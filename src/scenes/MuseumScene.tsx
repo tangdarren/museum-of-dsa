@@ -1,10 +1,16 @@
 import { Text, useCursor } from '@react-three/drei'
-import { useState } from 'react'
-import Exhibit from '../components/museum/Exhibit'
+import { useFrame } from '@react-three/fiber'
+import { useRef, useState } from 'react'
+import type {
+  AmbientLight,
+  DirectionalLight,
+  HemisphereLight,
+  SpotLight,
+} from 'three'
+import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
 import MuseumSign from '../components/museum/MuseumSign'
-import GraphVisualization from '../components/visualizations/graph/GraphVisualization'
-import { EXHIBITS } from '../data/exhibits'
-import { SAMPLE_GRAPH } from '../data/sampleGraph'
+import type { AlgorithmDefinition } from '../types/algorithm'
+import type { AlgorithmStep } from '../types/algorithmStep'
 import {
   ALGORITHMS_BACK,
   ALGORITHMS_CENTER_X,
@@ -267,30 +273,69 @@ function DestinationDoor({
 
 type MuseumSceneProps = {
   location: MuseumLocation
+  selectedAlgorithm: AlgorithmDefinition | null
+  previewAlgorithm: AlgorithmDefinition | null
+  playbackStep: AlgorithmStep | null
   onSelectAlgorithms: () => void
-  onSelectExhibit: (id: string) => void
   isTransitioning: boolean
 }
 
 function MuseumScene({
   location,
+  selectedAlgorithm,
+  previewAlgorithm,
+  playbackStep,
   onSelectAlgorithms,
-  onSelectExhibit,
   isTransitioning,
 }: MuseumSceneProps) {
   const showLobbyDestinations = location !== 'entrance'
-  const showExhibits = location === 'algorithms' || location === 'exhibit'
-  const visibleExhibits = showExhibits
-    ? EXHIBITS.filter((exhibit) => exhibit.wing === 'algorithms')
-    : []
+  const inspection = selectedAlgorithm !== null
+  const ambientRef = useRef<AmbientLight>(null)
+  const hemisphereRef = useRef<HemisphereLight>(null)
+  const directionalRef = useRef<DirectionalLight>(null)
+  const algorithmsFillRef = useRef<SpotLight>(null)
+  const lightBlend = useRef(0)
+  const reducedMotion = useRef(
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
+  useFrame((_, delta) => {
+    const goal = inspection ? 1 : 0
+    lightBlend.current = reducedMotion.current
+      ? goal
+      : lightBlend.current +
+        (goal - lightBlend.current) * Math.min(1, delta * 1.7)
+    const t = lightBlend.current
+
+    if (ambientRef.current) {
+      ambientRef.current.intensity = 0.28 - t * 0.08
+    }
+
+    if (hemisphereRef.current) {
+      hemisphereRef.current.intensity = 0.38 - t * 0.1
+    }
+
+    if (directionalRef.current) {
+      directionalRef.current.intensity = 0.72 - t * 0.2
+    }
+
+    if (algorithmsFillRef.current) {
+      algorithmsFillRef.current.intensity = 10 - t * 4.5
+    }
+  })
 
   return (
     <>
       <color attach="background" args={['#d9d5cd']} />
 
-      <hemisphereLight args={['#f4f1ea', '#b8b3a8', 0.38]} />
-      <ambientLight intensity={0.28} />
+      <hemisphereLight
+        ref={hemisphereRef}
+        args={['#f4f1ea', '#b8b3a8']}
+        intensity={0.38}
+      />
+      <ambientLight ref={ambientRef} intensity={0.28} />
       <directionalLight
+        ref={directionalRef}
         position={[5, 14, 7]}
         intensity={0.72}
         castShadow
@@ -555,6 +600,7 @@ function MuseumScene({
         <meshStandardMaterial color="#ebe7df" />
       </mesh>
       <spotLight
+        ref={algorithmsFillRef}
         position={[ALGORITHMS_CENTER_X, 8.2, ALGORITHMS_CENTER_Z]}
         angle={0.48}
         penumbra={0.7}
@@ -565,19 +611,11 @@ function MuseumScene({
         position={[ALGORITHMS_CENTER_X, ROOM_HEIGHT - 0.12, ALGORITHMS_CENTER_Z]}
       />
 
-      {visibleExhibits.map((exhibit) => (
-        <Exhibit
-          key={exhibit.id}
-          exhibit={exhibit}
-          onSelect={() => onSelectExhibit(exhibit.id)}
-          disabled={isTransitioning}
-          visualization={
-            exhibit.id === 'bfs' ? (
-              <GraphVisualization graph={SAMPLE_GRAPH} showWeights />
-            ) : undefined
-          }
-        />
-      ))}
+      <AlgorithmInstallation
+        algorithm={selectedAlgorithm}
+        preview={previewAlgorithm}
+        playbackStep={playbackStep}
+      />
 
       {COLUMNS.map((position) => (
         <Column key={position.join(',')} position={position} />

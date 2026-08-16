@@ -1,4 +1,5 @@
 import { EXHIBITS } from '../data/exhibits'
+import type { AlgorithmId } from '../types/algorithm'
 import type { Exhibit } from '../types/exhibit'
 
 export type Vec3 = [number, number, number]
@@ -47,6 +48,18 @@ export const ALGORITHMS_CENTER_X = LOBBY_DOOR_OFFSET
 export const ALGORITHMS_CENTER_Z = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH / 2
 export const ALGORITHMS_BACK = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH
 
+export const ALGORITHM_INSTALLATION_POSITION: Vec3 = [
+  ALGORITHMS_CENTER_X,
+  0,
+  ALGORITHMS_BACK + 1.15,
+]
+
+export const ALGORITHM_INSTALLATION_LOOK_AT: Vec3 = [
+  ALGORITHMS_CENTER_X,
+  3.15,
+  ALGORITHMS_BACK + 1.15,
+]
+
 export const MUSEUM_DESTINATIONS: Record<
   Exclude<MuseumLocation, 'exhibit'>,
   MuseumDestination
@@ -68,9 +81,15 @@ export const MUSEUM_DESTINATIONS: Record<
   },
   algorithms: {
     id: 'algorithms',
-    cameraPosition: [ALGORITHMS_CENTER_X, 3.25, LOBBY_BACK - 4.8],
-    lookAt: [ALGORITHMS_CENTER_X, 2.6, ALGORITHMS_BACK],
+    cameraPosition: [ALGORITHMS_CENTER_X, 3.15, LOBBY_BACK - 2.2],
+    lookAt: ALGORITHM_INSTALLATION_LOOK_AT,
   },
+}
+
+export const ALGORITHM_FOCUS_DESTINATION: MuseumDestination = {
+  id: 'algorithm-focus',
+  cameraPosition: [ALGORITHMS_CENTER_X, 3.1, LOBBY_BACK - 4.0],
+  lookAt: ALGORITHM_INSTALLATION_LOOK_AT,
 }
 
 function createExhibitDestination(exhibit: Exhibit): MuseumDestination {
@@ -111,14 +130,21 @@ export const EXHIBIT_DESTINATIONS: Record<string, MuseumDestination> =
 
 export function getMuseumDestination(
   location: MuseumLocation,
-  exhibitId: string | null,
+  selectedAlgorithm: AlgorithmId | null = null,
+  exhibitId: string | null = null,
 ): MuseumDestination {
+  if (location === 'algorithms' && selectedAlgorithm) {
+    return ALGORITHM_FOCUS_DESTINATION
+  }
+
   if (location === 'exhibit' && exhibitId) {
     return EXHIBIT_DESTINATIONS[exhibitId] ?? MUSEUM_DESTINATIONS.algorithms
   }
 
   if (location === 'exhibit') {
-    return MUSEUM_DESTINATIONS.algorithms
+    return selectedAlgorithm
+      ? ALGORITHM_FOCUS_DESTINATION
+      : MUSEUM_DESTINATIONS.algorithms
   }
 
   return MUSEUM_DESTINATIONS[location]

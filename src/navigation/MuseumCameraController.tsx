@@ -43,10 +43,15 @@ function MuseumCameraController({
       camera.position.distanceTo(toPosition.current) < 0.001 &&
       lookAt.current.distanceTo(toLookAt.current) < 0.001
 
-    if (alreadyThere) {
-      progress.current = 1
-      arrivedNotified.current = true
+    if (
+      alreadyThere ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      camera.position.set(...destination.cameraPosition)
+      lookAt.current.set(...destination.lookAt)
       camera.lookAt(lookAt.current)
+      progress.current = 1
+      arrivedNotified.current = false
       return
     }
 
@@ -59,6 +64,12 @@ function MuseumCameraController({
       camera.position.set(...destination.cameraPosition)
       lookAt.current.set(...destination.lookAt)
       camera.lookAt(lookAt.current)
+
+      if (!arrivedNotified.current) {
+        arrivedNotified.current = true
+        onArrived()
+      }
+
       return
     }
 
