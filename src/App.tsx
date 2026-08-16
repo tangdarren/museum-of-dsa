@@ -1,9 +1,11 @@
+import { Canvas } from '@react-three/fiber'
+import MuseumScene from './scenes/MuseumScene'
+
 function App() {
   return (
-    <main>
-      <h1>Museum of DSA</h1>
-      <p>An interactive museum of data structures and algorithms.</p>
-    </main>
+    <Canvas>
+      <MuseumScene />
+    </Canvas>
   )
 }
 
