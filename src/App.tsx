@@ -9,7 +9,7 @@ import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
-import EnterMuseumButton from './components/museum/EnterMuseumButton'
+import EntranceSequence from './components/museum/EntranceSequence'
 import { getAlgorithmById } from './data/algorithms'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
@@ -35,6 +35,7 @@ function App() {
   const [enterButton, setEnterButton] = useState<'active' | 'fading' | 'gone'>(
     'active',
   )
+  const [sceneReady, setSceneReady] = useState(false)
   const [startNodeId, setStartNodeId] = useState<string | null>(null)
   const [targetNodeId, setTargetNodeId] = useState<string | null>(null)
 
@@ -185,6 +186,11 @@ function App() {
           position: MUSEUM_DESTINATIONS.entrance.cameraPosition,
           fov: 46,
         }}
+        onCreated={() => {
+          requestAnimationFrame(() => {
+            setSceneReady(true)
+          })
+        }}
       >
         <MuseumCameraController
           destination={destination}
@@ -215,9 +221,10 @@ function App() {
         />
       </Canvas>
       {enterButton !== 'gone' ? (
-        <EnterMuseumButton
-          disabled={enterButton !== 'active'}
+        <EntranceSequence
+          sceneReady={sceneReady}
           fading={enterButton === 'fading'}
+          enterDisabled={enterButton !== 'active'}
           onEnter={handleEnterMuseum}
           onFaded={() => setEnterButton('gone')}
         />

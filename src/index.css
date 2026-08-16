@@ -35,6 +35,11 @@ body {
   height: 100%;
 }
 
+.app > canvas {
+  display: block;
+  background-color: #d2c4ae;
+}
+
 .museum-button {
   margin: 0;
   padding: 0.45rem 0.8rem;
@@ -112,6 +117,105 @@ body {
 .enter-museum-button.is-fading {
   opacity: 0;
   pointer-events: none;
+}
+
+.entrance-sequence {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.entrance-sequence.is-leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.entrance-skip {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+.entrance-copy {
+  position: absolute;
+  top: 14.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(42rem, calc(100vw - 2.5rem));
+  text-align: center;
+}
+
+.entrance-title {
+  margin: 0;
+  color: var(--cream);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: clamp(1.35rem, 3.5vw, 2.15rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.entrance-title span {
+  display: inline-block;
+}
+
+.entrance-subtitle {
+  margin: 0.55rem 0 0;
+  color: var(--brass-muted);
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: clamp(0.68rem, 1.35vw, 0.82rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  opacity: 0;
+}
+
+.entrance-accent {
+  position: absolute;
+  left: 50%;
+  top: 31%;
+  width: min(20rem, 38vw);
+  height: min(48vh, 28rem);
+  transform: translateX(-50%);
+  overflow: visible;
+  opacity: 0;
+}
+
+.entrance-accent path {
+  fill: none;
+  stroke: var(--brass);
+  stroke-width: 1;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.entrance-enter {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.entrance-enter.is-pending {
+  pointer-events: none;
+}
+
+.entrance-enter-motion {
+  opacity: 0;
+}
+
+.entrance-sequence .enter-museum-button {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
 }
 
 .algorithm-stage {
@@ -712,7 +816,8 @@ body {
   .algorithm-selector-close,
   .algorithm-option,
   .algorithm-plaque,
-  .algorithm-playback-button {
+  .algorithm-playback-button,
+  .entrance-sequence {
     transition: none;
   }
 }
