@@ -1,4 +1,5 @@
 import type { GraphEdgeStates, GraphNodeStates } from './graph'
+import type { SortingIndexRange, SortingMetrics } from './sorting'
 
 export type AlgorithmAuxiliaryData = {
   label: string
@@ -43,10 +44,22 @@ export type AlgorithmGraphSnapshot = {
   traversalOrder?: string[]
 }
 
+export type AlgorithmSortingSnapshot = {
+  values: number[]
+  metrics: SortingMetrics
+  comparedIndices?: number[]
+  swappedIndices?: number[]
+  writtenIndices?: number[]
+  pivotIndex?: number
+  activeRanges?: SortingIndexRange[]
+  sortedIndices?: number[]
+}
+
 export type AlgorithmStep = {
   id: string
   description: string
   snapshot?: AlgorithmGraphSnapshot
+  sortingSnapshot?: AlgorithmSortingSnapshot
   nodeStates?: GraphNodeStates
   edgeStates?: GraphEdgeStates
   auxiliaryData?: AlgorithmAuxiliaryData
