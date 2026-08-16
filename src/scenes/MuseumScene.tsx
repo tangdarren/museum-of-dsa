@@ -9,6 +9,7 @@ import type {
 } from 'three'
 import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
 import MuseumSign from '../components/museum/MuseumSign'
+import { museum } from '../theme/palette'
 import type { AlgorithmDefinition } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import {
@@ -55,10 +56,32 @@ const LOBBY_LIGHTS: [number, number, number][] = [
 
 function Column({ position }: { position: [number, number, number] }) {
   return (
-    <mesh position={position} castShadow receiveShadow>
-      <boxGeometry args={[0.58, ROOM_HEIGHT, 0.58]} />
-      <meshStandardMaterial color="#e2ddd4" />
-    </mesh>
+    <group position={position}>
+      <mesh position={[0, -ROOM_HEIGHT / 2 + 0.12, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.72, 0.24, 0.72]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[0.58, ROOM_HEIGHT, 0.58]} />
+        <meshStandardMaterial
+          color={museum.column}
+          roughness={0.78}
+          metalness={0.04}
+        />
+      </mesh>
+      <mesh position={[0, ROOM_HEIGHT / 2 - 0.1, 0]} castShadow>
+        <boxGeometry args={[0.68, 0.16, 0.68]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.5}
+        />
+      </mesh>
+    </group>
   )
 }
 
@@ -66,10 +89,28 @@ function CeilingLight({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
       <mesh>
-        <boxGeometry args={[1.1, 0.08, 1.1]} />
-        <meshStandardMaterial color="#f7f4ee" />
+        <boxGeometry args={[1.16, 0.04, 1.16]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.48}
+        />
       </mesh>
-      <pointLight intensity={4.2} distance={11} decay={2} />
+      <mesh position={[0, -0.03, 0]}>
+        <boxGeometry args={[1.1, 0.08, 1.1]} />
+        <meshStandardMaterial
+          color={museum.fixture}
+          emissive={museum.lightWarm}
+          emissiveIntensity={0.35}
+          roughness={0.45}
+        />
+      </mesh>
+      <pointLight
+        intensity={4.2}
+        distance={11}
+        decay={2}
+        color={museum.lightWarm}
+      />
     </group>
   )
 }
@@ -95,38 +136,70 @@ function Portal({
         <>
           <mesh position={[-width / 2 - 0.04, 0, -0.16]}>
             <boxGeometry args={[0.1, height, 0.38]} />
-            <meshStandardMaterial color="#2b2b29" />
+            <meshStandardMaterial
+              color={museum.charcoal}
+              roughness={0.5}
+              metalness={0.12}
+            />
           </mesh>
           <mesh position={[width / 2 + 0.04, 0, -0.16]}>
             <boxGeometry args={[0.1, height, 0.38]} />
-            <meshStandardMaterial color="#2b2b29" />
+            <meshStandardMaterial
+              color={museum.charcoal}
+              roughness={0.5}
+              metalness={0.12}
+            />
           </mesh>
           <mesh position={[0, height / 2 + 0.04, -0.16]}>
             <boxGeometry args={[width + 0.18, 0.1, 0.38]} />
-            <meshStandardMaterial color="#2b2b29" />
+            <meshStandardMaterial
+              color={museum.charcoal}
+              roughness={0.5}
+              metalness={0.12}
+            />
           </mesh>
         </>
       ) : (
         <mesh position={[0, 0, -0.08]}>
           <boxGeometry args={[width, height, 0.22]} />
-          <meshStandardMaterial color="#2b2b29" />
+          <meshStandardMaterial
+            color={museum.charcoal}
+            roughness={0.5}
+            metalness={0.12}
+          />
         </mesh>
       )}
       <mesh position={[0, height / 2 + frame / 2, 0.02]}>
         <boxGeometry args={[width + frame * 2, frame, 0.14]} />
-        <meshStandardMaterial color="#4a4a47" />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
       </mesh>
       <mesh position={[0, -height / 2 - frame / 2, 0.02]}>
         <boxGeometry args={[width + frame * 2, frame, 0.14]} />
-        <meshStandardMaterial color="#4a4a47" />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
       </mesh>
       <mesh position={[-width / 2 - frame / 2, 0, 0.02]}>
         <boxGeometry args={[frame, height, 0.14]} />
-        <meshStandardMaterial color="#4a4a47" />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
       </mesh>
       <mesh position={[width / 2 + frame / 2, 0, 0.02]}>
         <boxGeometry args={[frame, height, 0.14]} />
-        <meshStandardMaterial color="#4a4a47" />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
       </mesh>
     </group>
   )
@@ -175,7 +248,11 @@ function OpeningWall({
           receiveShadow
         >
           <boxGeometry args={[segment.w, height, thickness]} />
-          <meshStandardMaterial color="#f3f0ea" />
+          <meshStandardMaterial
+            color={museum.wall}
+            roughness={0.82}
+            metalness={0.02}
+          />
         </mesh>
       ))}
       {sorted.map((opening) => {
@@ -192,13 +269,21 @@ function OpeningWall({
                 receiveShadow
               >
                 <boxGeometry args={[opening.width, lintelHeight, thickness]} />
-                <meshStandardMaterial color="#f3f0ea" />
+                <meshStandardMaterial
+                  color={museum.wall}
+                  roughness={0.82}
+                  metalness={0.02}
+                />
               </mesh>
             ) : null}
             {sillHeight > 0.001 ? (
               <mesh position={[opening.x, sillHeight / 2, z]} receiveShadow>
                 <boxGeometry args={[opening.width, sillHeight, thickness]} />
-                <meshStandardMaterial color="#f3f0ea" />
+                <meshStandardMaterial
+                  color={museum.wall}
+                  roughness={0.82}
+                  metalness={0.02}
+                />
               </mesh>
             ) : null}
           </group>
@@ -276,6 +361,8 @@ type MuseumSceneProps = {
   selectedAlgorithm: AlgorithmDefinition | null
   previewAlgorithm: AlgorithmDefinition | null
   playbackStep: AlgorithmStep | null
+  selectingStart?: boolean
+  onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
   isTransitioning: boolean
 }
@@ -285,6 +372,8 @@ function MuseumScene({
   selectedAlgorithm,
   previewAlgorithm,
   playbackStep,
+  selectingStart = false,
+  onSelectNode,
   onSelectAlgorithms,
   isTransitioning,
 }: MuseumSceneProps) {
@@ -308,11 +397,11 @@ function MuseumScene({
     const t = lightBlend.current
 
     if (ambientRef.current) {
-      ambientRef.current.intensity = 0.28 - t * 0.08
+      ambientRef.current.intensity = 0.3 - t * 0.08
     }
 
     if (hemisphereRef.current) {
-      hemisphereRef.current.intensity = 0.38 - t * 0.1
+      hemisphereRef.current.intensity = 0.42 - t * 0.1
     }
 
     if (directionalRef.current) {
@@ -326,18 +415,19 @@ function MuseumScene({
 
   return (
     <>
-      <color attach="background" args={['#d9d5cd']} />
+      <color attach="background" args={[museum.atmosphere]} />
 
       <hemisphereLight
         ref={hemisphereRef}
-        args={['#f4f1ea', '#b8b3a8']}
-        intensity={0.38}
+        args={[museum.lightSky, museum.lightGround]}
+        intensity={0.42}
       />
-      <ambientLight ref={ambientRef} intensity={0.28} />
+      <ambientLight ref={ambientRef} intensity={0.3} />
       <directionalLight
         ref={directionalRef}
         position={[5, 14, 7]}
         intensity={0.72}
+        color={museum.lightWarm}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-22}
@@ -351,6 +441,7 @@ function MuseumScene({
         penumbra={0.7}
         intensity={18}
         distance={18}
+        color={museum.lightWarm}
       />
       <spotLight
         position={[0, 8.2, LOBBY_CENTER_Z]}
@@ -358,15 +449,24 @@ function MuseumScene({
         penumbra={0.7}
         intensity={12}
         distance={16}
+        color={museum.lightWarm}
       />
 
       <mesh position={[0, -WALL_THICKNESS / 2, 0]} receiveShadow>
         <boxGeometry args={[ROOM_WIDTH, WALL_THICKNESS, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#c8c3b8" />
+        <meshStandardMaterial
+          color={museum.stone}
+          roughness={0.9}
+          metalness={0.03}
+        />
       </mesh>
       <mesh position={[0, 0.02, -1.5]} receiveShadow>
         <boxGeometry args={[10, 0.04, 12]} />
-        <meshStandardMaterial color="#b7b1a6" />
+        <meshStandardMaterial
+          color={museum.stoneDeep}
+          roughness={0.88}
+          metalness={0.04}
+        />
       </mesh>
 
       <OpeningWall
@@ -381,54 +481,94 @@ function MuseumScene({
         receiveShadow
       >
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[ROOM_WIDTH / 2 + WALL_THICKNESS / 2, ROOM_HEIGHT / 2, 0]}
         receiveShadow
       >
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[-11, ROOM_HEIGHT / 2, ROOM_DEPTH / 2 + WALL_THICKNESS / 2]}
         receiveShadow
       >
         <boxGeometry args={[10, ROOM_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[11, ROOM_HEIGHT / 2, ROOM_DEPTH / 2 + WALL_THICKNESS / 2]}
         receiveShadow
       >
         <boxGeometry args={[10, ROOM_HEIGHT, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[0, ROOM_HEIGHT - 0.7, ROOM_DEPTH / 2 + WALL_THICKNESS / 2]}
         receiveShadow
       >
         <boxGeometry args={[12, 1.4, WALL_THICKNESS]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
 
       <mesh position={[0, ROOM_HEIGHT + WALL_THICKNESS / 2, 0]}>
         <boxGeometry args={[ROOM_WIDTH + WALL_THICKNESS * 2, WALL_THICKNESS, ROOM_DEPTH]} />
-        <meshStandardMaterial color="#ebe7df" />
+        <meshStandardMaterial
+          color={museum.ceiling}
+          roughness={0.86}
+          metalness={0.02}
+        />
       </mesh>
       <mesh position={[0, ROOM_HEIGHT - 0.18, -1]}>
         <boxGeometry args={[18, 0.08, 16]} />
-        <meshStandardMaterial color="#e4dfd6" />
+        <meshStandardMaterial
+          color={museum.ceilingSoft}
+          roughness={0.8}
+          metalness={0.03}
+        />
       </mesh>
 
-      <mesh position={[0, 6.05, FRONT_BACK + 0.1]} receiveShadow>
+      <mesh position={[0, 6.05, FRONT_BACK + 0.08]} receiveShadow>
+        <boxGeometry args={[13.7, 2.66, 0.08]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh position={[0, 6.05, FRONT_BACK + 0.12]} receiveShadow>
         <boxGeometry args={[13.5, 2.5, 0.12]} />
-        <meshStandardMaterial color="#3c3c3a" />
+        <meshStandardMaterial
+          color={museum.charcoal}
+          roughness={0.48}
+          metalness={0.14}
+        />
       </mesh>
       <Text
-        position={[0, 6.28, FRONT_BACK + 0.18]}
+        position={[0, 6.28, FRONT_BACK + 0.2]}
         fontSize={0.74}
-        color="#f4f1ea"
+        color={museum.cream}
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.12}
@@ -436,9 +576,9 @@ function MuseumScene({
         MUSEUM OF DSA
       </Text>
       <Text
-        position={[0, 5.48, FRONT_BACK + 0.18]}
+        position={[0, 5.48, FRONT_BACK + 0.2]}
         fontSize={0.26}
-        color="#c5c0b6"
+        color={museum.brassMuted}
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.14}
@@ -455,11 +595,19 @@ function MuseumScene({
 
       <mesh position={[0, -WALL_THICKNESS / 2, LOBBY_CENTER_Z]} receiveShadow>
         <boxGeometry args={[ROOM_WIDTH, WALL_THICKNESS, LOBBY_DEPTH]} />
-        <meshStandardMaterial color="#c8c3b8" />
+        <meshStandardMaterial
+          color={museum.stone}
+          roughness={0.9}
+          metalness={0.03}
+        />
       </mesh>
       <mesh position={[0, 0.02, LOBBY_CENTER_Z]} receiveShadow>
         <boxGeometry args={[8, 0.04, LOBBY_DEPTH - 2]} />
-        <meshStandardMaterial color="#b7b1a6" />
+        <meshStandardMaterial
+          color={museum.stoneDeep}
+          roughness={0.88}
+          metalness={0.04}
+        />
       </mesh>
       <mesh
         position={[
@@ -470,7 +618,11 @@ function MuseumScene({
         receiveShadow
       >
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, LOBBY_DEPTH]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[
@@ -481,7 +633,11 @@ function MuseumScene({
         receiveShadow
       >
         <boxGeometry args={[WALL_THICKNESS, ROOM_HEIGHT, LOBBY_DEPTH]} />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <OpeningWall
         z={LOBBY_BACK - WALL_THICKNESS / 2}
@@ -497,7 +653,11 @@ function MuseumScene({
         <boxGeometry
           args={[ROOM_WIDTH + WALL_THICKNESS * 2, WALL_THICKNESS, LOBBY_DEPTH]}
         />
-        <meshStandardMaterial color="#ebe7df" />
+        <meshStandardMaterial
+          color={museum.ceiling}
+          roughness={0.86}
+          metalness={0.02}
+        />
       </mesh>
 
       {showLobbyDestinations ? (
@@ -542,7 +702,135 @@ function MuseumScene({
         <boxGeometry
           args={[ALGORITHMS_ROOM_WIDTH, WALL_THICKNESS, ALGORITHMS_ROOM_DEPTH]}
         />
-        <meshStandardMaterial color="#c8c3b8" />
+        <meshStandardMaterial
+          color={museum.stone}
+          roughness={0.9}
+          metalness={0.03}
+        />
+      </mesh>
+      <mesh
+        position={[ALGORITHMS_CENTER_X, 0.025, ALGORITHMS_CENTER_Z - 0.4]}
+        receiveShadow
+      >
+        <boxGeometry args={[11.2, 0.05, 10.4]} />
+        <meshStandardMaterial
+          color={museum.stoneDeep}
+          roughness={0.86}
+          metalness={0.05}
+        />
+      </mesh>
+      <mesh position={[ALGORITHMS_CENTER_X, 0.04, ALGORITHMS_CENTER_Z + 4.8]}>
+        <boxGeometry args={[11.35, 0.02, 0.06]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh position={[ALGORITHMS_CENTER_X, 0.04, ALGORITHMS_CENTER_Z - 5.6]}>
+        <boxGeometry args={[11.35, 0.02, 0.06]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh
+        position={[ALGORITHMS_CENTER_X - 5.6, 0.04, ALGORITHMS_CENTER_Z - 0.4]}
+      >
+        <boxGeometry args={[0.06, 0.02, 10.55]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh
+        position={[ALGORITHMS_CENTER_X + 5.6, 0.04, ALGORITHMS_CENTER_Z - 0.4]}
+      >
+        <boxGeometry args={[0.06, 0.02, 10.55]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.5}
+        />
+      </mesh>
+      <mesh
+        position={[
+          ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.04,
+          0.7,
+          ALGORITHMS_CENTER_Z,
+        ]}
+        receiveShadow
+      >
+        <boxGeometry args={[0.08, 1.4, ALGORITHMS_ROOM_DEPTH - 0.3]} />
+        <meshStandardMaterial
+          color={museum.wainscot}
+          roughness={0.8}
+          metalness={0.04}
+        />
+      </mesh>
+      <mesh
+        position={[
+          ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.04,
+          0.7,
+          ALGORITHMS_CENTER_Z,
+        ]}
+        receiveShadow
+      >
+        <boxGeometry args={[0.08, 1.4, ALGORITHMS_ROOM_DEPTH - 0.3]} />
+        <meshStandardMaterial
+          color={museum.wainscot}
+          roughness={0.8}
+          metalness={0.04}
+        />
+      </mesh>
+      <mesh
+        position={[ALGORITHMS_CENTER_X, 0.7, ALGORITHMS_BACK + 0.04]}
+        receiveShadow
+      >
+        <boxGeometry args={[ALGORITHMS_ROOM_WIDTH - 0.2, 1.4, 0.08]} />
+        <meshStandardMaterial
+          color={museum.wainscot}
+          roughness={0.8}
+          metalness={0.04}
+        />
+      </mesh>
+      <mesh
+        position={[
+          ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.05,
+          0.06,
+          ALGORITHMS_CENTER_Z,
+        ]}
+      >
+        <boxGeometry args={[0.06, 0.12, ALGORITHMS_ROOM_DEPTH - 0.2]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.52}
+        />
+      </mesh>
+      <mesh
+        position={[
+          ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.05,
+          0.06,
+          ALGORITHMS_CENTER_Z,
+        ]}
+      >
+        <boxGeometry args={[0.06, 0.12, ALGORITHMS_ROOM_DEPTH - 0.2]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.52}
+        />
+      </mesh>
+      <mesh position={[ALGORITHMS_CENTER_X, 0.06, ALGORITHMS_BACK + 0.05]}>
+        <boxGeometry args={[ALGORITHMS_ROOM_WIDTH - 0.16, 0.12, 0.06]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.52}
+        />
       </mesh>
       <mesh
         position={[
@@ -555,7 +843,11 @@ function MuseumScene({
         <boxGeometry
           args={[WALL_THICKNESS, ROOM_HEIGHT, ALGORITHMS_ROOM_DEPTH]}
         />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[
@@ -568,7 +860,11 @@ function MuseumScene({
         <boxGeometry
           args={[WALL_THICKNESS, ROOM_HEIGHT, ALGORITHMS_ROOM_DEPTH]}
         />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[
@@ -581,7 +877,11 @@ function MuseumScene({
         <boxGeometry
           args={[ALGORITHMS_ROOM_WIDTH + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]}
         />
-        <meshStandardMaterial color="#f3f0ea" />
+        <meshStandardMaterial
+          color={museum.wall}
+          roughness={0.82}
+          metalness={0.02}
+        />
       </mesh>
       <mesh
         position={[
@@ -597,7 +897,11 @@ function MuseumScene({
             ALGORITHMS_ROOM_DEPTH,
           ]}
         />
-        <meshStandardMaterial color="#ebe7df" />
+        <meshStandardMaterial
+          color={museum.ceiling}
+          roughness={0.86}
+          metalness={0.02}
+        />
       </mesh>
       <spotLight
         ref={algorithmsFillRef}
@@ -606,6 +910,7 @@ function MuseumScene({
         penumbra={0.7}
         intensity={10}
         distance={14}
+        color={museum.lightWarm}
       />
       <CeilingLight
         position={[ALGORITHMS_CENTER_X, ROOM_HEIGHT - 0.12, ALGORITHMS_CENTER_Z]}
@@ -615,6 +920,8 @@ function MuseumScene({
         algorithm={selectedAlgorithm}
         preview={previewAlgorithm}
         playbackStep={playbackStep}
+        selectingStart={selectingStart}
+        onSelectNode={onSelectNode}
       />
 
       {COLUMNS.map((position) => (

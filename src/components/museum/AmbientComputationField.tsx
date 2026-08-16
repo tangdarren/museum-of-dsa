@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
 import { Color, Mesh, MeshBasicMaterial } from 'three'
+import { museum } from '../../theme/palette'
 
 const NODES: [number, number][] = [
   [-0.58, 0.38],
@@ -25,8 +26,17 @@ const LINKS: [number, number][] = [
   [5, 7],
 ]
 
-const NODE_COLOR = new Color('#c5c0b6')
-const LINE_COLOR = new Color('#8a857c')
+const NODE_COLORS = [
+  new Color(museum.tealSoft),
+  new Color(museum.brassMuted),
+  new Color(museum.tealSoft),
+  new Color(museum.cream),
+  new Color(museum.brass),
+  new Color(museum.tealSoft),
+  new Color(museum.cream),
+  new Color(museum.brassMuted),
+]
+const LINE_COLOR = new Color(museum.bronze)
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -77,11 +87,11 @@ function AmbientComputationField({ visible }: AmbientComputationFieldProps) {
 
         mesh.position.set(point[0], point[1], 0)
         const material = mesh.material as MeshBasicMaterial
-        material.opacity = show * 0.32
+        material.opacity = show * 0.42
       })
       lineMats.current.forEach((material) => {
         if (material) {
-          material.opacity = show * 0.18
+          material.opacity = show * 0.22
         }
       })
       return
@@ -100,7 +110,7 @@ function AmbientComputationField({ visible }: AmbientComputationFieldProps) {
         0,
       )
       const material = mesh.material as MeshBasicMaterial
-      material.opacity = show * (0.28 + Math.sin(t * 0.35 + index) * 0.08)
+      material.opacity = show * (0.36 + Math.sin(t * 0.35 + index) * 0.1)
     })
 
     lineMats.current.forEach((material, index) => {
@@ -109,7 +119,7 @@ function AmbientComputationField({ visible }: AmbientComputationFieldProps) {
       }
 
       material.opacity =
-        show * (0.08 + (Math.sin(t * 0.28 + index * 0.9) * 0.5 + 0.5) * 0.16)
+        show * (0.12 + (Math.sin(t * 0.28 + index * 0.9) * 0.5 + 0.5) * 0.18)
     })
   })
 
@@ -123,11 +133,11 @@ function AmbientComputationField({ visible }: AmbientComputationFieldProps) {
           }}
           position={[point[0], point[1], 0]}
         >
-          <sphereGeometry args={[0.016, 10, 8]} />
+          <sphereGeometry args={[0.02, 12, 10]} />
           <meshBasicMaterial
-            color={NODE_COLOR}
+            color={NODE_COLORS[index]}
             transparent
-            opacity={0.32}
+            opacity={0.4}
             depthWrite={false}
           />
         </mesh>
@@ -138,14 +148,14 @@ function AmbientComputationField({ visible }: AmbientComputationFieldProps) {
           position={link.position}
           rotation={link.rotation}
         >
-          <boxGeometry args={[link.length, 0.004, 0.004]} />
+          <boxGeometry args={[link.length, 0.0035, 0.0035]} />
           <meshBasicMaterial
             ref={(material) => {
               lineMats.current[index] = material
             }}
             color={LINE_COLOR}
             transparent
-            opacity={0.14}
+            opacity={0.16}
             depthWrite={false}
           />
         </mesh>

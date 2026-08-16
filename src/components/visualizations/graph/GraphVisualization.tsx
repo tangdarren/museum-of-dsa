@@ -12,6 +12,7 @@ type GraphVisualizationProps = {
   nodeStates?: GraphNodeStates
   edgeStates?: GraphEdgeStates
   showWeights?: boolean
+  onSelectNode?: (nodeId: string) => void
 }
 
 function GraphVisualization({
@@ -19,6 +20,7 @@ function GraphVisualization({
   nodeStates = {},
   edgeStates = {},
   showWeights = false,
+  onSelectNode,
 }: GraphVisualizationProps) {
   const nodesById = useMemo(
     () => Object.fromEntries(graph.nodes.map((node) => [node.id, node])),
@@ -51,6 +53,8 @@ function GraphVisualization({
           key={node.id}
           node={node}
           state={nodeStates[node.id] ?? 'default'}
+          selectable={Boolean(onSelectNode)}
+          onSelect={onSelectNode}
         />
       ))}
     </group>

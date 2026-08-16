@@ -5,6 +5,7 @@ import type { MeshStandardMaterial, SpotLight } from 'three'
 import { mapAlgorithmStepToGraph } from '../algorithms/mapAlgorithmStepToGraph'
 import { ALGORITHM_PREVIEWS } from '../../data/algorithmPreviews'
 import { ALGORITHM_INSTALLATION_POSITION } from '../../navigation/destinations'
+import { museum } from '../../theme/palette'
 import type { AlgorithmDefinition } from '../../types/algorithm'
 import type { AlgorithmStep } from '../../types/algorithmStep'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
@@ -15,6 +16,8 @@ type AlgorithmInstallationProps = {
   algorithm: AlgorithmDefinition | null
   preview: AlgorithmDefinition | null
   playbackStep: AlgorithmStep | null
+  selectingStart?: boolean
+  onSelectNode?: (nodeId: string) => void
 }
 
 function prefersReducedMotion() {
@@ -25,6 +28,8 @@ function AlgorithmInstallation({
   algorithm,
   preview,
   playbackStep,
+  selectingStart = false,
+  onSelectNode,
 }: AlgorithmInstallationProps) {
   const displayed = algorithm ?? preview
   const inspection = algorithm !== null
@@ -54,21 +59,21 @@ function AlgorithmInstallation({
     const t = blend.current
 
     if (screenRef.current) {
-      screenRef.current.emissiveIntensity = 0.06 + t * 0.12
+      screenRef.current.emissiveIntensity = 0.08 + t * 0.16
     }
 
     if (plateRef.current) {
-      plateRef.current.emissiveIntensity = t * 0.05
+      plateRef.current.emissiveIntensity = 0.04 + t * 0.08
     }
 
     edgeRefs.current.forEach((material) => {
       if (material) {
-        material.emissiveIntensity = 0.05 + t * 0.22
+        material.emissiveIntensity = 0.12 + t * 0.28
       }
     })
 
     if (lightRef.current) {
-      lightRef.current.intensity = 10 + t * 8
+      lightRef.current.intensity = 11 + t * 8
     }
   })
 
@@ -76,48 +81,118 @@ function AlgorithmInstallation({
     <group position={ALGORITHM_INSTALLATION_POSITION}>
       <mesh position={[0, 0.16, 0.06]} receiveShadow>
         <boxGeometry args={[12.8, 0.32, 1.7]} />
-        <meshStandardMaterial color="#c8c3b8" />
+        <meshStandardMaterial
+          color={museum.stone}
+          roughness={0.86}
+          metalness={0.04}
+        />
       </mesh>
-      <mesh position={[0, 0.38, 0.08]} castShadow receiveShadow>
-        <boxGeometry args={[12.2, 0.2, 1.28]} />
-        <meshStandardMaterial color="#d6d2c9" />
+      <mesh position={[0, 0.34, 0.06]}>
+        <boxGeometry args={[12.86, 0.05, 1.76]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.38}
+          metalness={0.55}
+        />
       </mesh>
-      <mesh position={[0, 0.5, 0.08]} castShadow receiveShadow>
-        <boxGeometry args={[12.4, 0.06, 1.4]} />
-        <meshStandardMaterial color="#b7b1a6" />
+      <mesh position={[0, 0.42, 0.08]} castShadow receiveShadow>
+        <boxGeometry args={[12.2, 0.18, 1.28]} />
+        <meshStandardMaterial
+          color={museum.stoneDeep}
+          roughness={0.8}
+          metalness={0.06}
+        />
+      </mesh>
+      <mesh position={[0, 0.52, 0.08]} castShadow receiveShadow>
+        <boxGeometry args={[12.45, 0.05, 1.42]} />
+        <meshStandardMaterial
+          color={museum.brass}
+          roughness={0.34}
+          metalness={0.58}
+        />
       </mesh>
       <mesh position={[-4.2, 0.88, -0.08]} castShadow receiveShadow>
         <boxGeometry args={[0.32, 0.72, 0.24]} />
-        <meshStandardMaterial color="#d0cbc2" />
+        <meshStandardMaterial
+          color={museum.column}
+          roughness={0.72}
+          metalness={0.08}
+        />
       </mesh>
       <mesh position={[4.2, 0.88, -0.08]} castShadow receiveShadow>
         <boxGeometry args={[0.32, 0.72, 0.24]} />
-        <meshStandardMaterial color="#d0cbc2" />
+        <meshStandardMaterial
+          color={museum.column}
+          roughness={0.72}
+          metalness={0.08}
+        />
+      </mesh>
+      <mesh position={[-4.2, 0.54, -0.08]}>
+        <boxGeometry args={[0.36, 0.08, 0.28]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
+      </mesh>
+      <mesh position={[4.2, 0.54, -0.08]}>
+        <boxGeometry args={[0.36, 0.08, 0.28]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
       </mesh>
       <mesh position={[0, 3.2, -0.28]} receiveShadow>
         <boxGeometry args={[12.5, 6.15, 0.18]} />
-        <meshStandardMaterial color="#e8e4db" />
+        <meshStandardMaterial
+          color={museum.wallDeep}
+          roughness={0.8}
+          metalness={0.03}
+        />
+      </mesh>
+      <mesh position={[0, 3.2, -0.18]}>
+        <boxGeometry args={[12.62, 6.28, 0.04]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.4}
+          metalness={0.5}
+        />
       </mesh>
 
       <mesh position={[0, 3.2, -0.02]} castShadow receiveShadow>
         <boxGeometry args={[12.15, 5.85, 0.22]} />
-        <meshStandardMaterial color="#4a4a47" />
+        <meshStandardMaterial
+          color={museum.charcoal}
+          roughness={0.48}
+          metalness={0.18}
+        />
       </mesh>
       <mesh position={[0, 3.2, 0.1]} castShadow>
         <boxGeometry args={[11.55, 5.25, 0.14]} />
-        <meshStandardMaterial color="#2f2f2d" />
+        <meshStandardMaterial
+          color={museum.slate}
+          roughness={0.42}
+          metalness={0.16}
+        />
       </mesh>
       <mesh position={[0, 3.2, 0.16]}>
         <boxGeometry args={[11.15, 4.85, 0.06]} />
-        <meshStandardMaterial color="#1b1b19" />
+        <meshStandardMaterial
+          color={museum.slateDeep}
+          roughness={0.5}
+          metalness={0.1}
+        />
       </mesh>
       <mesh position={[0, 3.2, 0.19]}>
         <boxGeometry args={[10.85, 4.55, 0.03]} />
         <meshStandardMaterial
           ref={screenRef}
-          color="#121210"
-          emissive="#1c1c18"
-          emissiveIntensity={0.06}
+          color={museum.screen}
+          emissive={museum.tealDeep}
+          emissiveIntensity={0.08}
+          roughness={0.62}
+          metalness={0.08}
         />
       </mesh>
 
@@ -127,9 +202,11 @@ function AlgorithmInstallation({
           ref={(material) => {
             edgeRefs.current[0] = material
           }}
-          color="#b8b3a8"
-          emissive="#b8b3a8"
-          emissiveIntensity={0.05}
+          color={museum.brass}
+          emissive={museum.brass}
+          emissiveIntensity={0.12}
+          roughness={0.32}
+          metalness={0.55}
         />
       </mesh>
       <mesh position={[5.46, 3.2, 0.21]}>
@@ -138,9 +215,11 @@ function AlgorithmInstallation({
           ref={(material) => {
             edgeRefs.current[1] = material
           }}
-          color="#b8b3a8"
-          emissive="#b8b3a8"
-          emissiveIntensity={0.05}
+          color={museum.brass}
+          emissive={museum.brass}
+          emissiveIntensity={0.12}
+          roughness={0.32}
+          metalness={0.55}
         />
       </mesh>
       <mesh position={[0, 5.43, 0.21]}>
@@ -149,9 +228,11 @@ function AlgorithmInstallation({
           ref={(material) => {
             edgeRefs.current[2] = material
           }}
-          color="#b8b3a8"
-          emissive="#b8b3a8"
-          emissiveIntensity={0.05}
+          color={museum.brass}
+          emissive={museum.brass}
+          emissiveIntensity={0.12}
+          roughness={0.32}
+          metalness={0.55}
         />
       </mesh>
       <mesh position={[0, 0.97, 0.21]}>
@@ -160,20 +241,34 @@ function AlgorithmInstallation({
           ref={(material) => {
             edgeRefs.current[3] = material
           }}
-          color="#b8b3a8"
-          emissive="#b8b3a8"
-          emissiveIntensity={0.05}
+          color={museum.brass}
+          emissive={museum.brass}
+          emissiveIntensity={0.12}
+          roughness={0.32}
+          metalness={0.55}
         />
       </mesh>
 
       <mesh position={[0, 0.72, 0.52]} castShadow>
-        <boxGeometry args={[1.7, 0.24, 0.04]} />
-        <meshStandardMaterial color="#3c3c3a" />
+        <boxGeometry args={[1.78, 0.26, 0.05]} />
+        <meshStandardMaterial
+          color={museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
+      </mesh>
+      <mesh position={[0, 0.72, 0.55]}>
+        <boxGeometry args={[1.68, 0.2, 0.03]} />
+        <meshStandardMaterial
+          color={museum.charcoal}
+          roughness={0.45}
+          metalness={0.12}
+        />
       </mesh>
       <Text
-        position={[0, 0.72, 0.55]}
+        position={[0, 0.72, 0.575]}
         fontSize={0.08}
-        color="#f3f0ea"
+        color={museum.cream}
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.16}
@@ -190,7 +285,7 @@ function AlgorithmInstallation({
           <Text
             position={[0, 5.12, 0.22]}
             fontSize={0.2}
-            color="#f4f1ea"
+            color={museum.cream}
             anchorX="center"
             anchorY="middle"
             letterSpacing={0.1}
@@ -202,32 +297,65 @@ function AlgorithmInstallation({
           <Text
             position={[0, 4.82, 0.22]}
             fontSize={0.1}
-            color="#c5c0b6"
+            color={museum.brassMuted}
             anchorX="center"
             anchorY="middle"
             letterSpacing={0.14}
           >
             {displayed.category}
           </Text>
-          <mesh position={[0, 2.95, 0.205]}>
-            <boxGeometry args={[9.2, 3.15, 0.02]} />
+          <mesh position={[0, 4.66, 0.21]}>
+            <boxGeometry args={[1.35, 0.012, 0.008]} />
+            <meshStandardMaterial
+              color={museum.brass}
+              emissive={museum.brass}
+              emissiveIntensity={0.2}
+              roughness={0.3}
+              metalness={0.5}
+            />
+          </mesh>
+          {selectingStart ? (
+            <Text
+              position={[0, 4.42, 0.22]}
+              fontSize={0.09}
+              color={museum.brassMuted}
+              anchorX="center"
+              anchorY="middle"
+              letterSpacing={0.16}
+            >
+              SELECT A START NODE
+            </Text>
+          ) : null}
+          <mesh position={[0, 2.95, 0.2]}>
+            <boxGeometry args={[9.45, 3.32, 0.018]} />
+            <meshStandardMaterial
+              color={museum.bronze}
+              roughness={0.38}
+              metalness={0.48}
+            />
+          </mesh>
+          <mesh position={[0, 2.95, 0.208]}>
+            <boxGeometry args={[9.18, 3.08, 0.02]} />
             <meshStandardMaterial
               ref={plateRef}
-              color="#e4dfd6"
-              emissive="#f4f1ea"
-              emissiveIntensity={0}
+              color={museum.plate}
+              emissive={museum.tealDeep}
+              emissiveIntensity={0.04}
+              roughness={0.7}
+              metalness={0.06}
             />
           </mesh>
           <group
             position={[0, 3.02, 0.23]}
             rotation={[Math.PI / 2, 0, 0]}
-            scale={2.85}
+            scale={2.7}
           >
             <GraphVisualization
               graph={SAMPLE_GRAPH}
               nodeStates={graphStates.nodeStates}
               edgeStates={graphStates.edgeStates}
               showWeights={showWeights}
+              onSelectNode={selectingStart ? onSelectNode : undefined}
             />
           </group>
         </group>
@@ -236,17 +364,27 @@ function AlgorithmInstallation({
           <Text
             position={[0, 3.7, 0.22]}
             fontSize={0.46}
-            color="#f4f1ea"
+            color={museum.cream}
             anchorX="center"
             anchorY="middle"
             letterSpacing={0.16}
           >
             ALGORITHMS
           </Text>
+          <mesh position={[0, 3.38, 0.21]}>
+            <boxGeometry args={[1.6, 0.014, 0.008]} />
+            <meshStandardMaterial
+              color={museum.brass}
+              emissive={museum.brass}
+              emissiveIntensity={0.18}
+              roughness={0.3}
+              metalness={0.5}
+            />
+          </mesh>
           <Text
             position={[0, 3.05, 0.22]}
             fontSize={0.16}
-            color="#c5c0b6"
+            color={museum.brassMuted}
             anchorX="center"
             anchorY="middle"
             maxWidth={8.2}
@@ -265,6 +403,7 @@ function AlgorithmInstallation({
         penumbra={0.8}
         intensity={12}
         distance={16}
+        color={museum.lightWarm}
       />
     </group>
   )

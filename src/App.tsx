@@ -1,11 +1,15 @@
 import { Canvas } from '@react-three/fiber'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import {
+  getAlgorithmSteps,
+  usesStartNodeSelection,
+} from './algorithms/getAlgorithmSteps'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
 import EnterMuseumButton from './components/museum/EnterMuseumButton'
 import { getAlgorithmById } from './data/algorithms'
-import { DEMO_ALGORITHM_STEPS } from './data/demoAlgorithmSteps'
+import { SAMPLE_GRAPH } from './data/sampleGraph'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -15,6 +19,8 @@ import {
 } from './navigation/destinations'
 import MuseumScene from './scenes/MuseumScene'
 import type { AlgorithmId } from './types/algorithm'
+
+type AlgorithmViewPhase = 'transitioning' | 'overview' | 'focused'
 
 function App() {
   const [location, setLocation] = useState<MuseumLocation>('entrance')
@@ -27,6 +33,7 @@ function App() {
   const [enterButton, setEnterButton] = useState<'active' | 'fading' | 'gone'>(
     'active',
   )
+  const [startNodeId, setStartNodeId] = useState<string | null>(null)
 
   const selectedAlgorithm = selectedAlgorithmId
     ? getAlgorithmById(selectedAlgorithmId)
@@ -35,10 +42,28 @@ function App() {
     ? getAlgorithmById(previewAlgorithmId)
     : null
   const destination = getMuseumDestination(location, selectedAlgorithmId)
-  const playback = useAlgorithmPlayback(
-    selectedAlgorithmId ? DEMO_ALGORITHM_STEPS : [],
-    selectedAlgorithmId,
+  const awaitingStart = Boolean(
+    selectedAlgorithmId &&
+      usesStartNodeSelection(selectedAlgorithmId) &&
+      !startNodeId,
   )
+  const steps = useMemo(
+    () =>
+      selectedAlgorithmId
+        ? getAlgorithmSteps(selectedAlgorithmId, SAMPLE_GRAPH, startNodeId)
+        : [],
+    [selectedAlgorithmId, startNodeId],
+  )
+  const playback = useAlgorithmPlayback(
+    steps,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}`,
+  )
+  const algorithmViewPhase: AlgorithmViewPhase =
+    location !== 'algorithms' || isTransitioning
+      ? 'transitioning'
+      : selectedAlgorithmId
+        ? 'focused'
+        : 'overview'
 
   const goToLocation = useCallback(
     (next: MuseumLocation) => {
@@ -52,6 +77,7 @@ function App() {
 
       setSelectedAlgorithmId(null)
       setPreviewAlgorithmId(null)
+      setStartNodeId(null)
       setSelectorOpen(false)
       setLocation(next)
       setIsTransitioning(true)
@@ -77,6 +103,7 @@ function App() {
 
       setSelectorOpen(false)
       setPreviewAlgorithmId(null)
+      setStartNodeId(null)
       setSelectedAlgorithmId(id)
       setIsTransitioning(true)
     },
@@ -90,6 +117,7 @@ function App() {
 
     setSelectedAlgorithmId(null)
     setPreviewAlgorithmId(null)
+    setStartNodeId(null)
     setSelectorOpen(false)
     setIsTransitioning(true)
   }, [isTransitioning])
@@ -97,6 +125,22 @@ function App() {
   const handleArrived = useCallback(() => {
     setIsTransitioning(false)
   }, [])
+
+  const handleSelectStartNode = useCallback((nodeId: string) => {
+    setStartNodeId(nodeId)
+  }, [])
+
+  const handlePlaybackReset = useCallback(() => {
+    if (
+      selectedAlgorithmId &&
+      usesStartNodeSelection(selectedAlgorithmId)
+    ) {
+      setStartNodeId(null)
+      return
+    }
+
+    playback.reset()
+  }, [playback, selectedAlgorithmId])
 
   return (
     <div className="app">
@@ -113,9 +157,23 @@ function App() {
         />
         <MuseumScene
           location={location}
-          selectedAlgorithm={selectedAlgorithm}
-          previewAlgorithm={previewAlgorithm}
-          playbackStep={selectedAlgorithm ? playback.currentStep : null}
+          selectedAlgorithm={
+            algorithmViewPhase === 'focused' ? selectedAlgorithm : null
+          }
+          previewAlgorithm={
+            algorithmViewPhase === 'overview' ? previewAlgorithm : null
+          }
+          playbackStep={
+            algorithmViewPhase === 'focused' ? playback.currentStep : null
+          }
+          selectingStart={
+            algorithmViewPhase === 'focused' && awaitingStart
+          }
+          onSelectNode={
+            algorithmViewPhase === 'focused' && awaitingStart
+              ? handleSelectStartNode
+              : undefined
+          }
           onSelectAlgorithms={() => goToLocation('algorithms')}
           isTransitioning={isTransitioning}
         />
@@ -128,45 +186,65 @@ function App() {
           onFaded={() => setEnterButton('gone')}
         />
       ) : null}
-      {location === 'algorithms' && !selectedAlgorithmId ? (
+      {algorithmViewPhase === 'overview' ? (
         <>
           <button
             type="button"
             className="museum-button lobby-button"
             onClick={() => goToLocation('lobby')}
-            disabled={isTransitioning}
           >
             ← Lobby
           </button>
-          <AlgorithmInstallationUi
-            selectorOpen={selectorOpen}
-            disabled={isTransitioning}
-            previewId={previewAlgorithmId}
-            onPreview={setPreviewAlgorithmId}
-            onOpenSelector={() => setSelectorOpen(true)}
-            onCloseSelector={() => {
-              setSelectorOpen(false)
-              setPreviewAlgorithmId(null)
-            }}
-            onSelectAlgorithm={handleSelectAlgorithm}
-          />
+          {selectorOpen ? (
+            <AlgorithmInstallationUi
+              selectorOpen
+              disabled={false}
+              previewId={previewAlgorithmId}
+              onPreview={setPreviewAlgorithmId}
+              onOpenSelector={() => setSelectorOpen(true)}
+              onCloseSelector={() => {
+                setSelectorOpen(false)
+                setPreviewAlgorithmId(null)
+              }}
+              onSelectAlgorithm={handleSelectAlgorithm}
+            />
+          ) : (
+            <div className="algorithm-stage">
+              <AlgorithmInstallationUi
+                selectorOpen={false}
+                disabled={false}
+                previewId={previewAlgorithmId}
+                onPreview={setPreviewAlgorithmId}
+                onOpenSelector={() => setSelectorOpen(true)}
+                onCloseSelector={() => {
+                  setSelectorOpen(false)
+                  setPreviewAlgorithmId(null)
+                }}
+                onSelectAlgorithm={handleSelectAlgorithm}
+              />
+            </div>
+          )}
         </>
       ) : null}
-      {location === 'algorithms' && selectedAlgorithm ? (
+      {algorithmViewPhase === 'focused' && selectedAlgorithm ? (
         <>
           <button
             type="button"
             className="museum-button lobby-button"
             onClick={handleBackToAlgorithms}
-            disabled={isTransitioning}
           >
             ← Algorithms
           </button>
-          <AlgorithmPlaque algorithm={selectedAlgorithm} />
-          <AlgorithmPlaybackView
-            playback={playback}
-            disabled={isTransitioning}
-          />
+          <div className="algorithm-focused-ui">
+            <AlgorithmPlaque algorithm={selectedAlgorithm} />
+            <AlgorithmPlaybackView
+              playback={{
+                ...playback,
+                reset: handlePlaybackReset,
+              }}
+              awaitingStart={awaitingStart}
+            />
+          </div>
         </>
       ) : null}
     </div>

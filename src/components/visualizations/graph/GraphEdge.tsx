@@ -3,14 +3,8 @@ import { useMemo } from 'react'
 import { Quaternion, Vector3 } from 'three'
 import type { GraphEdge as GraphEdgeData, GraphEdgeState } from '../../../types/graph'
 import type { Vec3 } from '../../../navigation/destinations'
+import { graphEdgeStyle, museum } from '../../../theme/palette'
 import { GRAPH_NODE_RADIUS } from './GraphNode'
-
-const EDGE_COLORS: Record<GraphEdgeState, string> = {
-  default: '#b0aaa0',
-  active: '#5a5550',
-  visited: '#8a857c',
-  path: '#4a4844',
-}
 
 const UP = new Vector3(0, 1, 0)
 
@@ -29,11 +23,12 @@ function GraphEdge({
   state,
   showWeight,
 }: GraphEdgeProps) {
+  const style = graphEdgeStyle[state]
   const layout = useMemo(() => {
     const start = new Vector3(...sourcePosition)
     const end = new Vector3(...targetPosition)
     const direction = end.clone().sub(start)
-    const length = Math.max(0.01, direction.length() - GRAPH_NODE_RADIUS * 2)
+    const length = Math.max(0.01, direction.length() - GRAPH_NODE_RADIUS * 2.4)
     const midpoint = start.clone().add(end).multiplyScalar(0.5)
     const quaternion = new Quaternion().setFromUnitVectors(
       UP,
@@ -44,21 +39,29 @@ function GraphEdge({
       length,
       position: midpoint.toArray() as Vec3,
       quaternion,
-      weightPosition: [midpoint.x, midpoint.y + 0.055, midpoint.z] as Vec3,
+      weightPosition: [midpoint.x, midpoint.y + 0.058, midpoint.z] as Vec3,
     }
   }, [sourcePosition, targetPosition])
 
   return (
     <group>
       <mesh position={layout.position} quaternion={layout.quaternion}>
-        <cylinderGeometry args={[0.011, 0.011, layout.length, 8]} />
-        <meshStandardMaterial color={EDGE_COLORS[state]} />
+        <cylinderGeometry args={[style.radius, style.radius, layout.length, 12]} />
+        <meshStandardMaterial
+          color={style.color}
+          emissive={style.emissive}
+          emissiveIntensity={style.emissiveIntensity}
+          roughness={0.42}
+          metalness={0.22}
+        />
       </mesh>
       {showWeight && edge.weight !== undefined ? (
         <Text
           position={layout.weightPosition}
-          fontSize={0.045}
-          color="#6a6560"
+          fontSize={0.046}
+          color={museum.cream}
+          outlineWidth={0.004}
+          outlineColor={museum.slateDeep}
           anchorX="center"
           anchorY="middle"
         >

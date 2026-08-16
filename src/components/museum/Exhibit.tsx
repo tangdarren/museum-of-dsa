@@ -2,6 +2,7 @@ import { Text, useCursor } from '@react-three/drei'
 import { useState, type ReactNode } from 'react'
 import type { Exhibit as ExhibitData } from '../../types/exhibit'
 import type { ExhibitWingId, Vec3 } from '../../navigation/destinations'
+import { museum } from '../../theme/palette'
 import MuseumPedestal from './MuseumPedestal'
 
 const WING_ROTATION: Record<ExhibitWingId, Vec3> = {
@@ -64,7 +65,11 @@ function Exhibit({
         <boxGeometry
           args={visualization ? [1.72, 0.04, 1.45] : [0.92, 0.04, 0.92]}
         />
-        <meshStandardMaterial color={showHover ? '#cfc9be' : '#b8b3a8'} />
+        <meshStandardMaterial
+          color={showHover ? museum.column : museum.stone}
+          roughness={0.78}
+          metalness={0.06}
+        />
       </mesh>
       {visualization ? (
         <group position={[0, 1.02, 0]}>{visualization}</group>
@@ -72,21 +77,27 @@ function Exhibit({
         <mesh position={[0, 1.42, 0]} castShadow>
           <boxGeometry args={[0.38, 0.38, 0.38]} />
           <meshStandardMaterial
-            color={showHover ? '#8f8a80' : '#7a756c'}
+            color={showHover ? museum.tealSoft : museum.teal}
             transparent
             opacity={0.72}
+            roughness={0.4}
+            metalness={0.2}
           />
         </mesh>
       )}
 
       <mesh position={[0, 1.12, 0.62]}>
         <boxGeometry args={[1.55, 0.32, 0.04]} />
-        <meshStandardMaterial color={showHover ? '#5c5c58' : '#3c3c3a'} />
+        <meshStandardMaterial
+          color={showHover ? museum.slate : museum.charcoal}
+          roughness={0.46}
+          metalness={0.14}
+        />
       </mesh>
       <Text
         position={[0, 1.18, 0.65]}
         fontSize={0.09}
-        color="#f3f0ea"
+        color={museum.cream}
         anchorX="center"
         anchorY="middle"
         maxWidth={1.45}
@@ -97,7 +108,7 @@ function Exhibit({
       <Text
         position={[0, 1.05, 0.65]}
         fontSize={0.055}
-        color="#c5c0b6"
+        color={museum.brassMuted}
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.08}
@@ -108,7 +119,7 @@ function Exhibit({
       <Text
         position={[0, 2.16, 0]}
         fontSize={0.13}
-        color="#3c3c3a"
+        color={museum.ink}
         anchorX="center"
         anchorY="middle"
         maxWidth={2.3}

@@ -1,5 +1,6 @@
 import { Text, useCursor } from '@react-three/drei'
 import { useState } from 'react'
+import { museum } from '../../theme/palette'
 
 type MuseumSignProps = {
   position: [number, number, number]
@@ -54,14 +55,26 @@ function MuseumSign({
           : undefined
       }
     >
+      <mesh position={[0, 0, -0.02]}>
+        <boxGeometry args={[3.72, height + 0.08, 0.04]} />
+        <meshStandardMaterial
+          color={showHover ? museum.brass : museum.bronze}
+          roughness={0.36}
+          metalness={0.52}
+        />
+      </mesh>
       <mesh>
         <boxGeometry args={[3.6, height, 0.06]} />
-        <meshStandardMaterial color={showHover ? '#5c5c58' : '#3c3c3a'} />
+        <meshStandardMaterial
+          color={showHover ? museum.slate : museum.charcoal}
+          roughness={0.46}
+          metalness={0.14}
+        />
       </mesh>
       <Text
         position={[0, subtitle ? 0.1 : 0, 0.04]}
         fontSize={0.16}
-        color="#f3f0ea"
+        color={museum.cream}
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.14}
@@ -72,7 +85,7 @@ function MuseumSign({
         <Text
           position={[0, -0.16, 0.04]}
           fontSize={0.11}
-          color="#c5c0b6"
+          color={museum.brassMuted}
           anchorX="center"
           anchorY="middle"
           letterSpacing={0.16}
