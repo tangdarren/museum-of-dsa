@@ -81,6 +81,58 @@ export const graphNodeStyle = {
   },
 } as const
 
+export const sortingBarStyle = {
+  default: {
+    color: '#ead9bc',
+    emissive: '#c4b089',
+    emissiveIntensity: 0.1,
+    roughness: 0.36,
+    metalness: 0.2,
+    scale: 1,
+  },
+  active: {
+    color: '#3d9a94',
+    emissive: '#2a7a76',
+    emissiveIntensity: 0.28,
+    roughness: 0.3,
+    metalness: 0.28,
+    scale: 1.06,
+  },
+  compared: {
+    color: '#e0b04a',
+    emissive: '#d4a040',
+    emissiveIntensity: 0.46,
+    roughness: 0.2,
+    metalness: 0.56,
+    scale: 1.1,
+  },
+  written: {
+    color: '#c45c42',
+    emissive: '#a44832',
+    emissiveIntensity: 0.4,
+    roughness: 0.22,
+    metalness: 0.48,
+    scale: 1.14,
+  },
+  pivot: {
+    color: '#3f7a52',
+    emissive: '#2d5c3e',
+    emissiveIntensity: 0.3,
+    roughness: 0.26,
+    metalness: 0.4,
+    scale: 1.12,
+    ring: '#8fbf8a',
+  },
+  sorted: {
+    color: '#6d7d8c',
+    emissive: '#3a4550',
+    emissiveIntensity: 0.08,
+    roughness: 0.52,
+    metalness: 0.14,
+    scale: 0.94,
+  },
+} as const
+
 export const graphEdgeStyle = {
   default: {
     color: '#8a8070',

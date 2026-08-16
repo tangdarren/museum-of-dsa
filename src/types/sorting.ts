@@ -4,8 +4,8 @@ export type SortingData = {
 
 export type SortingValueState =
   | 'default'
+  | 'active'
   | 'compared'
-  | 'swapped'
   | 'written'
   | 'pivot'
   | 'sorted'
