@@ -3,7 +3,7 @@ import MuseumScene from './scenes/MuseumScene'
 
 function App() {
   return (
-    <Canvas>
+    <Canvas shadows>
       <MuseumScene />
     </Canvas>
   )
