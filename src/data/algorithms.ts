@@ -42,22 +42,41 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     complexity: { time: 'O(V²)', space: 'O(V)' },
     available: true,
   },
-]
-
-export const FUTURE_ALGORITHMS: AlgorithmCatalogEntry[] = [
+  {
+    id: 'bubble-sort',
+    title: 'Bubble Sort',
+    category: 'Sorting',
+    shortDescription: 'Repeatedly swaps adjacent values that are out of order.',
+    explore: ['Adjacent comparisons', 'Swaps', 'Sorted suffix'],
+    complexity: { time: 'O(n²)', space: 'O(1)' },
+    available: true,
+  },
+  {
+    id: 'insertion-sort',
+    title: 'Insertion Sort',
+    category: 'Sorting',
+    shortDescription: 'Builds a sorted prefix by inserting each value into place.',
+    explore: ['Sorted prefix', 'Shifting values', 'Inserting the current key'],
+    complexity: { time: 'O(n²)', space: 'O(1)' },
+    available: true,
+  },
   {
     id: 'quick-sort',
     title: 'Quick Sort',
     category: 'Sorting',
     shortDescription: 'Sorts values by partitioning around a pivot.',
-    available: false,
+    explore: ['Pivot selection', 'Partitioning', 'Finalized positions'],
+    complexity: { time: 'O(n log n)', space: 'O(log n)' },
+    available: true,
   },
   {
     id: 'merge-sort',
     title: 'Merge Sort',
     category: 'Sorting',
     shortDescription: 'Sorts values by dividing and merging them.',
-    available: false,
+    explore: ['Dividing ranges', 'Merging halves', 'Writing values back'],
+    complexity: { time: 'O(n log n)', space: 'O(n)' },
+    available: true,
   },
 ]
 
@@ -75,7 +94,7 @@ export const ALGORITHM_SECTIONS: {
   },
   {
     category: 'Sorting',
-    entries: FUTURE_ALGORITHMS,
+    entries: ALGORITHMS.filter((algorithm) => algorithm.category === 'Sorting'),
   },
 ]
 

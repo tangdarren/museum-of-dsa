@@ -1,6 +1,12 @@
-export type AlgorithmId = 'bfs' | 'dfs' | 'dijkstra' | 'astar'
-
-export type FutureAlgorithmId = 'quick-sort' | 'merge-sort'
+export type AlgorithmId =
+  | 'bfs'
+  | 'dfs'
+  | 'dijkstra'
+  | 'astar'
+  | 'bubble-sort'
+  | 'insertion-sort'
+  | 'quick-sort'
+  | 'merge-sort'
 
 export type AlgorithmCategory = 'Graph Traversal' | 'Pathfinding' | 'Sorting'
 
@@ -12,21 +18,11 @@ export type AlgorithmComplexity = {
 export type AlgorithmDefinition = {
   id: AlgorithmId
   title: string
-  category: Exclude<AlgorithmCategory, 'Sorting'>
+  category: AlgorithmCategory
   shortDescription: string
   explore: [string, string, string]
   complexity: AlgorithmComplexity
   available: true
 }
 
-export type FutureAlgorithmDefinition = {
-  id: FutureAlgorithmId
-  title: string
-  category: 'Sorting'
-  shortDescription: string
-  available: false
-}
-
-export type AlgorithmCatalogEntry =
-  | AlgorithmDefinition
-  | FutureAlgorithmDefinition
+export type AlgorithmCatalogEntry = AlgorithmDefinition

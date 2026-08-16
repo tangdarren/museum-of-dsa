@@ -3,14 +3,16 @@ import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { MeshStandardMaterial, SpotLight } from 'three'
 import { mapAlgorithmStepToGraph } from '../algorithms/mapAlgorithmStepToGraph'
+import { isSortingCategory } from '../../algorithms/getAlgorithmSteps'
 import { ALGORITHM_PREVIEWS } from '../../data/algorithmPreviews'
 import { ALGORITHM_INSTALLATION_POSITION } from '../../navigation/destinations'
+import { SAMPLE_GRAPH } from '../../data/sampleGraph'
 import { museum } from '../../theme/palette'
 import type { AlgorithmDefinition } from '../../types/algorithm'
 import type { AlgorithmStep } from '../../types/algorithmStep'
 import type { GraphNodeStates } from '../../types/graph'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
-import { SAMPLE_GRAPH } from '../../data/sampleGraph'
+import SortVisualization from '../visualizations/sorting/SortVisualization'
 import AmbientComputationField from './AmbientComputationField'
 
 type AlgorithmInstallationProps = {
@@ -38,7 +40,17 @@ function AlgorithmInstallation({
   const inspection = algorithm !== null
   const previewing = preview !== null && algorithm === null
   const previewConfig = preview && !algorithm ? ALGORITHM_PREVIEWS[preview.id] : null
+  const showingSorting = displayed ? isSortingCategory(displayed.category) : false
   const playbackGraph = mapAlgorithmStepToGraph(playbackStep)
+  const graphPreview =
+    previewConfig?.visualization === 'graph' ? previewConfig : null
+  const sortingSnapshot = showingSorting
+    ? algorithm
+      ? (playbackStep?.sortingSnapshot ?? null)
+      : previewConfig?.visualization === 'sorting'
+        ? previewConfig.snapshot
+        : null
+    : null
   const graphStates = algorithm
     ? playbackStep
       ? playbackGraph
@@ -47,13 +59,13 @@ function AlgorithmInstallation({
           edgeStates: {},
         }
     : {
-        nodeStates: previewConfig?.nodeStates ?? {},
-        edgeStates: previewConfig?.edgeStates ?? {},
+        nodeStates: graphPreview?.nodeStates ?? {},
+        edgeStates: graphPreview?.edgeStates ?? {},
       }
   const showWeights =
     displayed?.id === 'dijkstra' || displayed?.id === 'astar'
       ? true
-      : Boolean(previewConfig?.showWeights && !algorithm)
+      : Boolean(graphPreview?.showWeights && !algorithm)
   const edgeRefs = useRef<(MeshStandardMaterial | null)[]>([])
   const screenRef = useRef<MeshStandardMaterial>(null)
   const plateRef = useRef<MeshStandardMaterial>(null)
@@ -357,19 +369,25 @@ function AlgorithmInstallation({
               metalness={0.06}
             />
           </mesh>
-          <group
-            position={[0, 3.02, 0.23]}
-            rotation={[Math.PI / 2, 0, 0]}
-            scale={2.7}
-          >
-            <GraphVisualization
-              graph={SAMPLE_GRAPH}
-              nodeStates={graphStates.nodeStates}
-              edgeStates={graphStates.edgeStates}
-              showWeights={showWeights}
-              onSelectNode={selectionPrompt ? onSelectNode : undefined}
-            />
-          </group>
+          {showingSorting ? (
+            <group position={[0, 2.28, 0.34]} scale={2.85}>
+              <SortVisualization snapshot={sortingSnapshot} />
+            </group>
+          ) : (
+            <group
+              position={[0, 3.02, 0.23]}
+              rotation={[Math.PI / 2, 0, 0]}
+              scale={2.7}
+            >
+              <GraphVisualization
+                graph={SAMPLE_GRAPH}
+                nodeStates={graphStates.nodeStates}
+                edgeStates={graphStates.edgeStates}
+                showWeights={showWeights}
+                onSelectNode={selectionPrompt ? onSelectNode : undefined}
+              />
+            </group>
+          )}
         </group>
       ) : (
         <group>

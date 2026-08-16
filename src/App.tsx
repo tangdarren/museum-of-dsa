@@ -12,6 +12,7 @@ import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
 import EntranceSequence from './components/museum/EntranceSequence'
 import { getAlgorithmById } from './data/algorithms'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
+import { SAMPLE_SORTING_DATA } from './data/sampleSorting'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -67,18 +68,24 @@ function App() {
   const steps = useMemo(
     () =>
       selectedAlgorithmId
-        ? getAlgorithmSteps(
-            selectedAlgorithmId,
-            SAMPLE_GRAPH,
+        ? getAlgorithmSteps(selectedAlgorithmId, {
+            graph: SAMPLE_GRAPH,
             startNodeId,
             targetNodeId,
-          )
+            values: SAMPLE_SORTING_DATA.values,
+          })
         : [],
     [selectedAlgorithmId, startNodeId, targetNodeId],
   )
   const playback = useAlgorithmPlayback(
     steps,
     `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}`,
+  )
+  const canResetPlayback = Boolean(
+    selectedAlgorithmId &&
+      (usesStartNodeSelection(selectedAlgorithmId)
+        ? startNodeId
+        : steps.length > 0),
   )
   const algorithmViewPhase: AlgorithmViewPhase =
     location !== 'algorithms' || isTransitioning
@@ -202,14 +209,12 @@ function App() {
           previewAlgorithm={
             algorithmViewPhase === 'overview' ? previewAlgorithm : null
           }
-          playbackStep={
-            algorithmViewPhase === 'focused' ? playback.currentStep : null
-          }
+          playbackStep={selectedAlgorithm ? playback.currentStep : null}
           selectionPrompt={
             algorithmViewPhase === 'focused' ? selectionPrompt : null
           }
           setupNodeStates={
-            algorithmViewPhase === 'focused' ? setupNodeStates : undefined
+            selectedAlgorithm ? setupNodeStates : undefined
           }
           onSelectNode={
             algorithmViewPhase === 'focused' && selectionPrompt
@@ -285,7 +290,7 @@ function App() {
             <AlgorithmPlaybackView
               playback={playback}
               onReset={handlePlaybackReset}
-              allowReset={Boolean(startNodeId)}
+              allowReset={canResetPlayback}
               selectionPrompt={selectionPrompt}
             />
           </div>
