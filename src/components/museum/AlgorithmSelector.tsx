@@ -20,6 +20,7 @@ function AlgorithmSelector({
     <div
       className="algorithm-selector"
       role="dialog"
+      aria-modal="true"
       aria-label="Choose algorithm"
       onMouseLeave={(event) => {
         if (!event.currentTarget.contains(document.activeElement)) {

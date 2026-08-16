@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 type EnterMuseumButtonProps = {
   disabled: boolean
   fading: boolean
@@ -11,6 +13,15 @@ function EnterMuseumButton({
   onEnter,
   onFaded,
 }: EnterMuseumButtonProps) {
+  useEffect(() => {
+    if (
+      fading &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      onFaded()
+    }
+  }, [fading, onFaded])
+
   return (
     <button
       type="button"
@@ -18,6 +29,7 @@ function EnterMuseumButton({
         fading ? 'enter-museum-button is-fading' : 'enter-museum-button'
       }
       disabled={disabled}
+      aria-label="Enter the museum"
       onClick={onEnter}
       onTransitionEnd={(event) => {
         if (event.propertyName === 'opacity' && fading) {

@@ -4,12 +4,16 @@ import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
 type AlgorithmPlaybackViewProps = {
   playback: AlgorithmPlayback
   disabled?: boolean
+  allowReset?: boolean
+  onReset?: () => void
   selectionPrompt?: 'start' | 'target' | null
 }
 
 function AlgorithmPlaybackView({
   playback,
   disabled = false,
+  allowReset = false,
+  onReset,
   selectionPrompt = null,
 }: AlgorithmPlaybackViewProps) {
   const auxiliary = playback.currentStep?.auxiliaryData
@@ -42,7 +46,9 @@ function AlgorithmPlaybackView({
   return (
     <section className="algorithm-playback" aria-label="Algorithm playback">
       <p className="algorithm-playback-step">{stepLabel}</p>
-      <p className="algorithm-playback-description">{description}</p>
+      <p className="algorithm-playback-description" aria-live="polite">
+        {description}
+      </p>
       {isPathComplete && pathResult?.found ? (
         <div className="algorithm-playback-summary">
           <p className="algorithm-playback-order">{pathResult.nodes.join(' → ')}</p>
@@ -123,7 +129,12 @@ function AlgorithmPlaybackView({
           )}
         </div>
       ) : null}
-      <AlgorithmPlaybackControls playback={playback} disabled={disabled} />
+      <AlgorithmPlaybackControls
+        playback={playback}
+        disabled={disabled}
+        allowReset={allowReset}
+        onReset={onReset}
+      />
     </section>
   )
 }

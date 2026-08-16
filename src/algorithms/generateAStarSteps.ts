@@ -113,7 +113,7 @@ export function generateAStarSteps(
   }
 
   addStep(
-    `Start at ${startNodeId}. Estimate the cost to the target.`,
+    `Start at ${startNodeId}. Estimate the remaining cost to the target.`,
     startNodeId,
     [],
   )
@@ -121,11 +121,11 @@ export function generateAStarSteps(
   if (startNodeId === targetNodeId) {
     settled.add(startNodeId)
     addStep(
-      `${startNodeId} has the lowest estimated total cost, so explore it next.`,
+      `Explore ${startNodeId} next. It has the lowest estimated total cost.`,
       startNodeId,
       [],
     )
-    addStep('Target reached. Reconstruct the shortest path.', undefined, [], {
+    addStep('Shortest path found.', undefined, [], {
       path: [startNodeId],
       cost: 0,
     })
@@ -146,14 +146,14 @@ export function generateAStarSteps(
     const current = item.nodeId
     settled.add(current)
     addStep(
-      `${current} has the lowest estimated total cost, so explore it next.`,
+      `Explore ${current} next. It has the lowest estimated total cost.`,
       current,
       [],
     )
 
     if (current === targetNodeId) {
       const path = reconstructPath(previous, startNodeId, targetNodeId) ?? []
-      addStep('Target reached. Reconstruct the shortest path.', undefined, [], {
+      addStep('Shortest path found.', undefined, [], {
         path,
         cost: gScores.get(targetNodeId) ?? null,
         found: path.length > 0,
@@ -187,8 +187,8 @@ export function generateAStarSteps(
 
       addStep(
         improved
-          ? `Checking ${current} → ${neighbor.nodeId} lowers g(${neighbor.nodeId}) from ${formatMetric(currentG)} to ${formatMetric(throughG)}. f(${neighbor.nodeId}) = g(${neighbor.nodeId}) + h(${neighbor.nodeId}) = ${formatMetric(throughG)} + ${formatMetric(h)} = ${formatMetric(f)}.`
-          : `Checking ${current} → ${neighbor.nodeId} does not improve g(${neighbor.nodeId}).`,
+          ? `${current} → ${neighbor.nodeId} lowers g(${neighbor.nodeId}) from ${formatMetric(currentG)} to ${formatMetric(throughG)}. f(${neighbor.nodeId}) is now ${formatMetric(f)}.`
+          : `${current} → ${neighbor.nodeId} does not lower g(${neighbor.nodeId}).`,
         current,
         [neighbor.edgeId],
         {

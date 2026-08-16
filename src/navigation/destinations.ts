@@ -1,17 +1,8 @@
-import { EXHIBITS } from '../data/exhibits'
 import type { AlgorithmId } from '../types/algorithm'
-import type { Exhibit } from '../types/exhibit'
 
 export type Vec3 = [number, number, number]
 
-export type MuseumLocation =
-  | 'entrance'
-  | 'lobby'
-  | 'data-structures'
-  | 'algorithms'
-  | 'exhibit'
-
-export type ExhibitWingId = 'data-structures' | 'algorithms' | 'graph-theory'
+export type MuseumLocation = 'entrance' | 'lobby' | 'data-structures' | 'algorithms'
 
 export type MuseumDestination = {
   id: string
@@ -60,10 +51,7 @@ export const ALGORITHM_INSTALLATION_LOOK_AT: Vec3 = [
   ALGORITHMS_BACK + 1.15,
 ]
 
-export const MUSEUM_DESTINATIONS: Record<
-  Exclude<MuseumLocation, 'exhibit'>,
-  MuseumDestination
-> = {
+export const MUSEUM_DESTINATIONS: Record<MuseumLocation, MuseumDestination> = {
   entrance: {
     id: 'entrance',
     cameraPosition: [0, 3.35, 12.2],
@@ -92,59 +80,12 @@ export const ALGORITHM_FOCUS_DESTINATION: MuseumDestination = {
   lookAt: ALGORITHM_INSTALLATION_LOOK_AT,
 }
 
-function createExhibitDestination(exhibit: Exhibit): MuseumDestination {
-  const [x, y, z] = exhibit.position
-
-  switch (exhibit.wing) {
-    case 'graph-theory':
-      return exhibit.id === 'bfs'
-        ? {
-            id: exhibit.id,
-            cameraPosition: [x, y + 2.55, z + 4.1],
-            lookAt: [x, y + 1.28, z],
-          }
-        : {
-            id: exhibit.id,
-            cameraPosition: [x, y + 2.35, z + 3.5],
-            lookAt: [x, y + 1.55, z],
-          }
-    case 'data-structures':
-      return {
-        id: exhibit.id,
-        cameraPosition: [x + 3.5, y + 2.35, z],
-        lookAt: [x, y + 1.55, z],
-      }
-    case 'algorithms':
-      return {
-        id: exhibit.id,
-        cameraPosition: [x - 3.5, y + 2.35, z],
-        lookAt: [x, y + 1.55, z],
-      }
-  }
-}
-
-export const EXHIBIT_DESTINATIONS: Record<string, MuseumDestination> =
-  Object.fromEntries(
-    EXHIBITS.map((exhibit) => [exhibit.id, createExhibitDestination(exhibit)]),
-  )
-
 export function getMuseumDestination(
   location: MuseumLocation,
   selectedAlgorithm: AlgorithmId | null = null,
-  exhibitId: string | null = null,
 ): MuseumDestination {
   if (location === 'algorithms' && selectedAlgorithm) {
     return ALGORITHM_FOCUS_DESTINATION
-  }
-
-  if (location === 'exhibit' && exhibitId) {
-    return EXHIBIT_DESTINATIONS[exhibitId] ?? MUSEUM_DESTINATIONS.algorithms
-  }
-
-  if (location === 'exhibit') {
-    return selectedAlgorithm
-      ? ALGORITHM_FOCUS_DESTINATION
-      : MUSEUM_DESTINATIONS.algorithms
   }
 
   return MUSEUM_DESTINATIONS[location]

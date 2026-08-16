@@ -4,12 +4,18 @@ export type FutureAlgorithmId = 'quick-sort' | 'merge-sort'
 
 export type AlgorithmCategory = 'Graph Traversal' | 'Pathfinding' | 'Sorting'
 
+export type AlgorithmComplexity = {
+  time: string
+  space: string
+}
+
 export type AlgorithmDefinition = {
   id: AlgorithmId
   title: string
   category: Exclude<AlgorithmCategory, 'Sorting'>
   shortDescription: string
   explore: [string, string, string]
+  complexity: AlgorithmComplexity
   available: true
 }
 

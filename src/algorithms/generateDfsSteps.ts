@@ -16,7 +16,7 @@ export function generateDfsSteps(
   const steps: AlgorithmStep[] = [
     createTraversalStep({
       id: 'dfs-start',
-      description: `Start at node ${startNodeId} and push it onto the stack.`,
+      description: `Start at ${startNodeId} and push it onto the stack.`,
       snapshot: {
         startNodeId,
         currentNodeId: startNodeId,
@@ -70,8 +70,7 @@ export function generateDfsSteps(
     if (discoveredNeighbors.length > 0 && next) {
       description = `Visit ${current} and continue deeper to ${next}.`
     } else if (stack.length > 0) {
-      description =
-        'No unvisited neighbors remain here, so continue with the next node on the stack.'
+      description = 'No unused neighbors here. Continue from the stack.'
     } else {
       description = `Visit ${current}. No unvisited neighbors remain.`
     }

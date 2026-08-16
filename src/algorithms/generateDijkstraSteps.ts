@@ -80,14 +80,12 @@ export function generateDijkstraSteps(
               found,
               nodes: path,
               cost: extras.cost ?? null,
-              exploredCount: settled.size,
             }
           : extras.found === false
             ? {
                 found: false,
                 nodes: [],
                 cost: null,
-                exploredCount: settled.size,
               }
             : undefined,
       }),
@@ -95,16 +93,16 @@ export function generateDijkstraSteps(
     stepIndex += 1
   }
 
-  addStep('Initialize distances.', startNodeId, [])
+  addStep('Set the start distance to 0 and all others to ∞.', startNodeId, [])
 
   if (startNodeId === targetNodeId) {
     settled.add(startNodeId)
     addStep(
-      `Visit node ${startNodeId}, the unsettled node with the smallest known distance.`,
+      `Visit ${startNodeId}. It has the smallest known distance.`,
       startNodeId,
       [],
     )
-    addStep('Target reached. Reconstruct the shortest path.', undefined, [], {
+    addStep('Shortest path found.', undefined, [], {
       path: [startNodeId],
       cost: 0,
     })
@@ -125,14 +123,14 @@ export function generateDijkstraSteps(
     const current = item.nodeId
     settled.add(current)
     addStep(
-      `Visit node ${current}, the unsettled node with the smallest known distance.`,
+      `Visit ${current}. It has the smallest known distance.`,
       current,
       [],
     )
 
     if (current === targetNodeId) {
       const path = reconstructPath(previous, startNodeId, targetNodeId) ?? []
-      addStep('Target reached. Reconstruct the shortest path.', undefined, [], {
+      addStep('Shortest path found.', undefined, [], {
         path,
         cost: distances.get(targetNodeId) ?? null,
         found: path.length > 0,
@@ -159,8 +157,8 @@ export function generateDijkstraSteps(
 
       addStep(
         improved
-          ? `Check edge ${current} → ${neighbor.nodeId} with weight ${neighbor.weight}. Distance through ${current} is shorter, so update ${neighbor.nodeId} from ${formatMetric(currentDistance)} to ${formatMetric(throughDistance)}.`
-          : `Check edge ${current} → ${neighbor.nodeId} with weight ${neighbor.weight}. ${neighbor.nodeId} does not improve, so keep its current distance.`,
+          ? `${current} → ${neighbor.nodeId} is cheaper. Update ${neighbor.nodeId} from ${formatMetric(currentDistance)} to ${formatMetric(throughDistance)}.`
+          : `${current} → ${neighbor.nodeId} is not cheaper. Keep ${neighbor.nodeId} at ${formatMetric(currentDistance)}.`,
         current,
         [neighbor.edgeId],
         {

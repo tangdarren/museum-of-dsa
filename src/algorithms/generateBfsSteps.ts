@@ -19,7 +19,7 @@ export function generateBfsSteps(
   const steps: AlgorithmStep[] = [
     createTraversalStep({
       id: 'bfs-start',
-      description: `Start at node ${startNodeId} and add it to the queue.`,
+      description: `Start at ${startNodeId} and add it to the queue.`,
       snapshot: {
         startNodeId,
         currentNodeId: startNodeId,
@@ -98,7 +98,7 @@ export function generateBfsSteps(
   steps.push(
     createTraversalStep({
       id: 'bfs-complete',
-      description: 'Traversal complete. All reachable nodes have been visited.',
+      description: 'Traversal complete.',
       snapshot: {
         startNodeId,
         visitedNodeIds: [...visited],

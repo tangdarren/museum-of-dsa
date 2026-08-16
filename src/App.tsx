@@ -5,6 +5,7 @@ import {
   usesStartNodeSelection,
   usesTargetNodeSelection,
 } from './algorithms/getAlgorithmSteps'
+import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
@@ -55,10 +56,13 @@ function App() {
           ? 'target'
           : null
       : null
-  const setupNodeStates = {
-    ...(startNodeId ? { [startNodeId]: 'start' as const } : {}),
-    ...(targetNodeId ? { [targetNodeId]: 'target' as const } : {}),
-  }
+  const setupNodeStates = useMemo(
+    () => ({
+      ...(startNodeId ? { [startNodeId]: 'start' as const } : {}),
+      ...(targetNodeId ? { [targetNodeId]: 'target' as const } : {}),
+    }),
+    [startNodeId, targetNodeId],
+  )
   const steps = useMemo(
     () =>
       selectedAlgorithmId
@@ -188,9 +192,7 @@ function App() {
         />
         <MuseumScene
           location={location}
-          selectedAlgorithm={
-            algorithmViewPhase === 'focused' ? selectedAlgorithm : null
-          }
+          selectedAlgorithm={selectedAlgorithm}
           previewAlgorithm={
             algorithmViewPhase === 'overview' ? previewAlgorithm : null
           }
@@ -269,13 +271,13 @@ function App() {
           >
             ← Algorithms
           </button>
+          <AlgorithmLegend algorithmId={selectedAlgorithm.id} />
           <div className="algorithm-focused-ui">
             <AlgorithmPlaque algorithm={selectedAlgorithm} />
             <AlgorithmPlaybackView
-              playback={{
-                ...playback,
-                reset: handlePlaybackReset,
-              }}
+              playback={playback}
+              onReset={handlePlaybackReset}
+              allowReset={Boolean(startNodeId)}
               selectionPrompt={selectionPrompt}
             />
           </div>

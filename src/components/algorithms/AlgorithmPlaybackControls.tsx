@@ -4,13 +4,18 @@ import type { AlgorithmPlayback } from '../../hooks/useAlgorithmPlayback'
 type AlgorithmPlaybackControlsProps = {
   playback: AlgorithmPlayback
   disabled?: boolean
+  allowReset?: boolean
+  onReset?: () => void
 }
 
 function AlgorithmPlaybackControls({
   playback,
   disabled = false,
+  allowReset = false,
+  onReset,
 }: AlgorithmPlaybackControlsProps) {
   const inactive = disabled || playback.stepCount === 0
+  const resetDisabled = disabled || (playback.stepCount === 0 && !allowReset)
 
   return (
     <div className="algorithm-playback-controls">
@@ -28,6 +33,7 @@ function AlgorithmPlaybackControls({
           className="algorithm-playback-button is-primary"
           onClick={playback.togglePlay}
           disabled={inactive || (!playback.isPlaying && !playback.canPlay)}
+          aria-label={playback.isPlaying ? 'Pause playback' : 'Play playback'}
         >
           {playback.isPlaying ? 'Pause' : 'Play'}
         </button>
@@ -43,8 +49,8 @@ function AlgorithmPlaybackControls({
       <button
         type="button"
         className="algorithm-playback-button is-reset"
-        onClick={playback.reset}
-        disabled={inactive}
+        onClick={onReset ?? playback.reset}
+        disabled={resetDisabled}
       >
         Reset
       </button>

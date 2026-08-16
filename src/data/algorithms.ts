@@ -12,6 +12,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     category: 'Graph Traversal',
     shortDescription: 'Explores a graph level by level.',
     explore: ['Traversal order', 'Visited nodes', 'Frontier'],
+    complexity: { time: 'O(V + E)', space: 'O(V)' },
     available: true,
   },
   {
@@ -20,6 +21,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     category: 'Graph Traversal',
     shortDescription: 'Follows one path as far as it can go.',
     explore: ['Depth-first exploration', 'Visited nodes', 'Traversal stack'],
+    complexity: { time: 'O(V + E)', space: 'O(V)' },
     available: true,
   },
   {
@@ -28,6 +30,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     category: 'Pathfinding',
     shortDescription: 'Finds the shortest path in a weighted graph.',
     explore: ['Weighted edges', 'Tentative distances', 'Shortest path'],
+    complexity: { time: 'O(V²)', space: 'O(V)' },
     available: true,
   },
   {
@@ -36,6 +39,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     category: 'Pathfinding',
     shortDescription: 'Finds a path with the help of a heuristic.',
     explore: ['Path cost', 'Heuristic estimate', 'Shortest path'],
+    complexity: { time: 'O(V²)', space: 'O(V)' },
     available: true,
   },
 ]
