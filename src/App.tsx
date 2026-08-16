@@ -218,6 +218,7 @@ function App() {
           }
           onSelectAlgorithms={() => goToLocation('algorithms')}
           isTransitioning={isTransitioning}
+          showEntranceLettering={enterButton === 'gone'}
         />
       </Canvas>
       {enterButton !== 'gone' ? (

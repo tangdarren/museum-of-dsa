@@ -1,11 +1,4 @@
-import {
-  createDrawable,
-  createScope,
-  createTimeline,
-  splitText,
-  stagger,
-  utils,
-} from 'animejs'
+import { createScope, createTimeline, utils } from 'animejs'
 import { useEffect, useRef, useState } from 'react'
 import EnterMuseumButton from './EnterMuseumButton'
 
@@ -31,7 +24,6 @@ function EntranceSequence({
   const rootRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const accentRef = useRef<SVGSVGElement>(null)
   const enterMotionRef = useRef<HTMLDivElement>(null)
   const timelineRef = useRef<ReturnType<typeof createTimeline> | null>(null)
   const [enterReady, setEnterReady] = useState(false)
@@ -43,10 +35,9 @@ function EntranceSequence({
 
     const title = titleRef.current
     const subtitle = subtitleRef.current
-    const accent = accentRef.current
     const enter = enterMotionRef.current
 
-    if (!title || !subtitle || !accent || !enter) {
+    if (!title || !subtitle || !enter) {
       return
     }
 
@@ -57,14 +48,10 @@ function EntranceSequence({
       }
     }
 
-    const drawables = createDrawable(accent.querySelectorAll('path'))
-
     if (prefersReducedMotion()) {
-      utils.set(title, { opacity: 1 })
+      utils.set(title, { opacity: 1, y: 0 })
       utils.set(subtitle, { opacity: 1, y: 0 })
-      utils.set(accent, { opacity: 0.26 })
       utils.set(enter, { opacity: 1, y: 0 })
-      utils.set(drawables, { draw: '0 1' })
       revealEnter()
       return
     }
@@ -77,17 +64,9 @@ function EntranceSequence({
 
       scope = createScope({ root: rootRef })
       scope.add(() => {
-        const split = splitText(title, {
-          chars: true,
-          includeSpaces: true,
-        })
-
-        utils.set(title, { opacity: 1 })
-        utils.set(split.chars, { opacity: 0, y: 10, scale: 0.975 })
-        utils.set(subtitle, { opacity: 0, y: 8 })
-        utils.set(accent, { opacity: 0 })
+        utils.set(title, { opacity: 0, y: 8 })
+        utils.set(subtitle, { opacity: 0, y: 6 })
         utils.set(enter, { opacity: 0, y: 6 })
-        utils.set(drawables, { draw: '0 0' })
 
         const timeline = createTimeline({
           defaults: { ease: 'out(3)' },
@@ -96,13 +75,11 @@ function EntranceSequence({
 
         timeline
           .add(
-            split.chars,
+            title,
             {
               opacity: [0, 1],
-              y: [10, 0],
-              scale: [0.975, 1],
-              duration: 500,
-              delay: stagger(32),
+              y: [8, 0],
+              duration: 420,
             },
             0,
           )
@@ -110,54 +87,25 @@ function EntranceSequence({
             subtitle,
             {
               opacity: [0, 1],
-              y: [8, 0],
-              duration: 400,
+              y: [6, 0],
+              duration: 360,
             },
-            680,
-          )
-          .add(
-            accent,
-            {
-              opacity: [0, 0.88],
-              duration: 200,
-              ease: 'out(2)',
-            },
-            880,
-          )
-          .add(
-            drawables,
-            {
-              draw: ['0 0', '0 1'],
-              duration: 500,
-              ease: 'inOut(2)',
-              delay: stagger(32),
-            },
-            900,
+            180,
           )
           .add(
             enter,
             {
               opacity: [0, 1],
               y: [6, 0],
-              duration: 360,
+              duration: 350,
             },
-            1280,
-          )
-          .add(
-            accent,
-            {
-              opacity: 0.26,
-              duration: 280,
-              ease: 'inOut(2)',
-            },
-            1480,
+            480,
           )
 
         timelineRef.current = timeline
 
         return () => {
           timeline.cancel()
-          split.revert()
           timelineRef.current = null
         }
       })
@@ -195,21 +143,6 @@ function EntranceSequence({
           Data Structures & Algorithms
         </p>
       </div>
-      <svg
-        ref={accentRef}
-        className="entrance-accent"
-        viewBox="0 0 200 260"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M52 46 H148" />
-        <path d="M40 72 V46 H66" />
-        <path d="M160 72 V46 H134" />
-        <path d="M40 188 V214 H66" />
-        <path d="M160 188 V214 H134" />
-        <path d="M40 130 H52" />
-        <path d="M160 130 H148" />
-      </svg>
       <div
         className={
           enterReady ? 'entrance-enter' : 'entrance-enter is-pending'

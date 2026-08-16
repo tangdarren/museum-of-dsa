@@ -367,6 +367,7 @@ type MuseumSceneProps = {
   onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
   isTransitioning: boolean
+  showEntranceLettering?: boolean
 }
 
 function MuseumScene({
@@ -379,6 +380,7 @@ function MuseumScene({
   onSelectNode,
   onSelectAlgorithms,
   isTransitioning,
+  showEntranceLettering = true,
 }: MuseumSceneProps) {
   const showLobbyDestinations = location !== 'entrance'
   const inspection = selectedAlgorithm !== null
@@ -575,6 +577,7 @@ function MuseumScene({
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.12}
+        visible={showEntranceLettering}
       >
         MUSEUM OF DSA
       </Text>
@@ -585,6 +588,7 @@ function MuseumScene({
         anchorX="center"
         anchorY="middle"
         letterSpacing={0.14}
+        visible={showEntranceLettering}
       >
         Data Structures & Algorithms
       </Text>

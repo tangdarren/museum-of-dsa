@@ -141,7 +141,7 @@ body {
 
 .entrance-copy {
   position: absolute;
-  top: 14.5%;
+  top: 34.5%;
   left: 50%;
   transform: translateX(-50%);
   width: min(42rem, calc(100vw - 2.5rem));
@@ -160,10 +160,6 @@ body {
   opacity: 0;
 }
 
-.entrance-title span {
-  display: inline-block;
-}
-
 .entrance-subtitle {
   margin: 0.55rem 0 0;
   color: var(--brass-muted);
@@ -173,25 +169,6 @@ body {
   letter-spacing: 0.14em;
   line-height: 1.3;
   opacity: 0;
-}
-
-.entrance-accent {
-  position: absolute;
-  left: 50%;
-  top: 31%;
-  width: min(20rem, 38vw);
-  height: min(48vh, 28rem);
-  transform: translateX(-50%);
-  overflow: visible;
-  opacity: 0;
-}
-
-.entrance-accent path {
-  fill: none;
-  stroke: var(--brass);
-  stroke-width: 1;
-  stroke-linecap: square;
-  stroke-linejoin: miter;
 }
 
 .entrance-enter {
