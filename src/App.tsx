@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react'
 import {
   getAlgorithmSteps,
   usesStartNodeSelection,
+  usesTargetNodeSelection,
 } from './algorithms/getAlgorithmSteps'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
@@ -34,6 +35,7 @@ function App() {
     'active',
   )
   const [startNodeId, setStartNodeId] = useState<string | null>(null)
+  const [targetNodeId, setTargetNodeId] = useState<string | null>(null)
 
   const selectedAlgorithm = selectedAlgorithmId
     ? getAlgorithmById(selectedAlgorithmId)
@@ -42,21 +44,36 @@ function App() {
     ? getAlgorithmById(previewAlgorithmId)
     : null
   const destination = getMuseumDestination(location, selectedAlgorithmId)
-  const awaitingStart = Boolean(
-    selectedAlgorithmId &&
-      usesStartNodeSelection(selectedAlgorithmId) &&
-      !startNodeId,
+  const needsTarget = Boolean(
+    selectedAlgorithmId && usesTargetNodeSelection(selectedAlgorithmId),
   )
+  const selectionPrompt =
+    selectedAlgorithmId && usesStartNodeSelection(selectedAlgorithmId)
+      ? !startNodeId
+        ? 'start'
+        : needsTarget && !targetNodeId
+          ? 'target'
+          : null
+      : null
+  const setupNodeStates = {
+    ...(startNodeId ? { [startNodeId]: 'start' as const } : {}),
+    ...(targetNodeId ? { [targetNodeId]: 'target' as const } : {}),
+  }
   const steps = useMemo(
     () =>
       selectedAlgorithmId
-        ? getAlgorithmSteps(selectedAlgorithmId, SAMPLE_GRAPH, startNodeId)
+        ? getAlgorithmSteps(
+            selectedAlgorithmId,
+            SAMPLE_GRAPH,
+            startNodeId,
+            targetNodeId,
+          )
         : [],
-    [selectedAlgorithmId, startNodeId],
+    [selectedAlgorithmId, startNodeId, targetNodeId],
   )
   const playback = useAlgorithmPlayback(
     steps,
-    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}`,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}`,
   )
   const algorithmViewPhase: AlgorithmViewPhase =
     location !== 'algorithms' || isTransitioning
@@ -78,6 +95,7 @@ function App() {
       setSelectedAlgorithmId(null)
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
+      setTargetNodeId(null)
       setSelectorOpen(false)
       setLocation(next)
       setIsTransitioning(true)
@@ -104,6 +122,7 @@ function App() {
       setSelectorOpen(false)
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
+      setTargetNodeId(null)
       setSelectedAlgorithmId(id)
       setIsTransitioning(true)
     },
@@ -118,6 +137,7 @@ function App() {
     setSelectedAlgorithmId(null)
     setPreviewAlgorithmId(null)
     setStartNodeId(null)
+    setTargetNodeId(null)
     setSelectorOpen(false)
     setIsTransitioning(true)
   }, [isTransitioning])
@@ -126,9 +146,19 @@ function App() {
     setIsTransitioning(false)
   }, [])
 
-  const handleSelectStartNode = useCallback((nodeId: string) => {
-    setStartNodeId(nodeId)
-  }, [])
+  const handleSelectGraphNode = useCallback(
+    (nodeId: string) => {
+      if (!startNodeId) {
+        setStartNodeId(nodeId)
+        return
+      }
+
+      if (needsTarget && !targetNodeId) {
+        setTargetNodeId(nodeId)
+      }
+    },
+    [needsTarget, startNodeId, targetNodeId],
+  )
 
   const handlePlaybackReset = useCallback(() => {
     if (
@@ -136,6 +166,7 @@ function App() {
       usesStartNodeSelection(selectedAlgorithmId)
     ) {
       setStartNodeId(null)
+      setTargetNodeId(null)
       return
     }
 
@@ -166,12 +197,15 @@ function App() {
           playbackStep={
             algorithmViewPhase === 'focused' ? playback.currentStep : null
           }
-          selectingStart={
-            algorithmViewPhase === 'focused' && awaitingStart
+          selectionPrompt={
+            algorithmViewPhase === 'focused' ? selectionPrompt : null
+          }
+          setupNodeStates={
+            algorithmViewPhase === 'focused' ? setupNodeStates : undefined
           }
           onSelectNode={
-            algorithmViewPhase === 'focused' && awaitingStart
-              ? handleSelectStartNode
+            algorithmViewPhase === 'focused' && selectionPrompt
+              ? handleSelectGraphNode
               : undefined
           }
           onSelectAlgorithms={() => goToLocation('algorithms')}
@@ -242,7 +276,7 @@ function App() {
                 ...playback,
                 reset: handlePlaybackReset,
               }}
-              awaitingStart={awaitingStart}
+              selectionPrompt={selectionPrompt}
             />
           </div>
         </>

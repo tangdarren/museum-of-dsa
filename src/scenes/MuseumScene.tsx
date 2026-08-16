@@ -12,6 +12,7 @@ import MuseumSign from '../components/museum/MuseumSign'
 import { museum } from '../theme/palette'
 import type { AlgorithmDefinition } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
+import type { GraphNodeStates } from '../types/graph'
 import {
   ALGORITHMS_BACK,
   ALGORITHMS_CENTER_X,
@@ -361,7 +362,8 @@ type MuseumSceneProps = {
   selectedAlgorithm: AlgorithmDefinition | null
   previewAlgorithm: AlgorithmDefinition | null
   playbackStep: AlgorithmStep | null
-  selectingStart?: boolean
+  selectionPrompt?: 'start' | 'target' | null
+  setupNodeStates?: GraphNodeStates
   onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
   isTransitioning: boolean
@@ -372,7 +374,8 @@ function MuseumScene({
   selectedAlgorithm,
   previewAlgorithm,
   playbackStep,
-  selectingStart = false,
+  selectionPrompt = null,
+  setupNodeStates,
   onSelectNode,
   onSelectAlgorithms,
   isTransitioning,
@@ -920,7 +923,8 @@ function MuseumScene({
         algorithm={selectedAlgorithm}
         preview={previewAlgorithm}
         playbackStep={playbackStep}
-        selectingStart={selectingStart}
+        selectionPrompt={selectionPrompt}
+        setupNodeStates={setupNodeStates}
         onSelectNode={onSelectNode}
       />
 

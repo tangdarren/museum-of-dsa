@@ -56,6 +56,10 @@ function mapSnapshotToGraph(snapshot: AlgorithmGraphSnapshot): {
     assignNodeState(nodeStates, nodeId, 'frontier')
   }
 
+  for (const nodeId of snapshot.pathNodeIds ?? []) {
+    assignNodeState(nodeStates, nodeId, 'visited')
+  }
+
   if (snapshot.targetNodeId) {
     assignNodeState(nodeStates, snapshot.targetNodeId, 'target')
   }

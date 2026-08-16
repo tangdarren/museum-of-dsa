@@ -8,6 +8,7 @@ import { ALGORITHM_INSTALLATION_POSITION } from '../../navigation/destinations'
 import { museum } from '../../theme/palette'
 import type { AlgorithmDefinition } from '../../types/algorithm'
 import type { AlgorithmStep } from '../../types/algorithmStep'
+import type { GraphNodeStates } from '../../types/graph'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
 import { SAMPLE_GRAPH } from '../../data/sampleGraph'
 import AmbientComputationField from './AmbientComputationField'
@@ -16,7 +17,8 @@ type AlgorithmInstallationProps = {
   algorithm: AlgorithmDefinition | null
   preview: AlgorithmDefinition | null
   playbackStep: AlgorithmStep | null
-  selectingStart?: boolean
+  selectionPrompt?: 'start' | 'target' | null
+  setupNodeStates?: GraphNodeStates
   onSelectNode?: (nodeId: string) => void
 }
 
@@ -28,7 +30,8 @@ function AlgorithmInstallation({
   algorithm,
   preview,
   playbackStep,
-  selectingStart = false,
+  selectionPrompt = null,
+  setupNodeStates,
   onSelectNode,
 }: AlgorithmInstallationProps) {
   const displayed = algorithm ?? preview
@@ -36,14 +39,21 @@ function AlgorithmInstallation({
   const previewing = preview !== null && algorithm === null
   const previewConfig = preview && !algorithm ? ALGORITHM_PREVIEWS[preview.id] : null
   const playbackGraph = mapAlgorithmStepToGraph(playbackStep)
-  const graphStates =
-    algorithm && playbackStep
+  const graphStates = algorithm
+    ? playbackStep
       ? playbackGraph
       : {
-          nodeStates: previewConfig?.nodeStates ?? {},
-          edgeStates: previewConfig?.edgeStates ?? {},
+          nodeStates: setupNodeStates ?? {},
+          edgeStates: {},
         }
-  const showWeights = Boolean(previewConfig?.showWeights && !algorithm)
+    : {
+        nodeStates: previewConfig?.nodeStates ?? {},
+        edgeStates: previewConfig?.edgeStates ?? {},
+      }
+  const showWeights =
+    displayed?.id === 'dijkstra' || displayed?.id === 'astar'
+      ? true
+      : Boolean(previewConfig?.showWeights && !algorithm)
   const edgeRefs = useRef<(MeshStandardMaterial | null)[]>([])
   const screenRef = useRef<MeshStandardMaterial>(null)
   const plateRef = useRef<MeshStandardMaterial>(null)
@@ -314,7 +324,7 @@ function AlgorithmInstallation({
               metalness={0.5}
             />
           </mesh>
-          {selectingStart ? (
+          {selectionPrompt ? (
             <Text
               position={[0, 4.42, 0.22]}
               fontSize={0.09}
@@ -323,7 +333,9 @@ function AlgorithmInstallation({
               anchorY="middle"
               letterSpacing={0.16}
             >
-              SELECT A START NODE
+              {selectionPrompt === 'target'
+                ? 'SELECT A TARGET NODE'
+                : 'SELECT A START NODE'}
             </Text>
           ) : null}
           <mesh position={[0, 2.95, 0.2]}>
@@ -355,7 +367,7 @@ function AlgorithmInstallation({
               nodeStates={graphStates.nodeStates}
               edgeStates={graphStates.edgeStates}
               showWeights={showWeights}
-              onSelectNode={selectingStart ? onSelectNode : undefined}
+              onSelectNode={selectionPrompt ? onSelectNode : undefined}
             />
           </group>
         </group>

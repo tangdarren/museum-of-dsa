@@ -43,6 +43,83 @@ export function findEdgeId(
   )?.id
 }
 
+export type WeightedNeighbor = {
+  nodeId: string
+  weight: number
+  edgeId: string
+}
+
+export function buildWeightedAdjacency(
+  graph: GraphData,
+): Map<string, WeightedNeighbor[]> {
+  const adjacency = new Map<string, WeightedNeighbor[]>()
+
+  for (const node of graph.nodes) {
+    adjacency.set(node.id, [])
+  }
+
+  for (const edge of graph.edges) {
+    const weight = edge.weight ?? 1
+    const fromNeighbors = adjacency.get(edge.source)
+    const toNeighbors = adjacency.get(edge.target)
+
+    if (fromNeighbors && !fromNeighbors.some((item) => item.nodeId === edge.target)) {
+      fromNeighbors.push({ nodeId: edge.target, weight, edgeId: edge.id })
+    }
+
+    if (toNeighbors && !toNeighbors.some((item) => item.nodeId === edge.source)) {
+      toNeighbors.push({ nodeId: edge.source, weight, edgeId: edge.id })
+    }
+  }
+
+  for (const neighbors of adjacency.values()) {
+    neighbors.sort((left, right) => compareNodeIds(left.nodeId, right.nodeId))
+  }
+
+  return adjacency
+}
+
+export function reconstructPath(
+  previous: Map<string, string>,
+  startNodeId: string,
+  targetNodeId: string,
+): string[] | null {
+  if (startNodeId === targetNodeId) {
+    return [startNodeId]
+  }
+
+  const path = [targetNodeId]
+  const seen = new Set<string>([targetNodeId])
+  let current = targetNodeId
+
+  while (current !== startNodeId) {
+    const parent = previous.get(current)
+
+    if (!parent || seen.has(parent)) {
+      return null
+    }
+
+    path.push(parent)
+    seen.add(parent)
+    current = parent
+  }
+
+  path.reverse()
+  return path
+}
+
+export function formatMetric(value: number): string {
+  if (!Number.isFinite(value)) {
+    return '∞'
+  }
+
+  if (Number.isInteger(value)) {
+    return String(value)
+  }
+
+  return value.toFixed(1)
+}
+
 export function formatNodeList(ids: string[]): string {
   if (ids.length === 0) {
     return ''
