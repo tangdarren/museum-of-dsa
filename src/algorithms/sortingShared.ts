@@ -75,6 +75,7 @@ export function swapValues(
   state.values[leftIndex] = state.values[rightIndex]
   state.values[rightIndex] = left
   state.metrics.swaps += 1
+  state.metrics.writes += 2
 }
 
 export function writeValue(
