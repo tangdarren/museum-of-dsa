@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, useState } from 'react'
 import {
   getAlgorithmSteps,
+  isSortingCategory,
   usesStartNodeSelection,
   usesTargetNodeSelection,
 } from './algorithms/getAlgorithmSteps'
@@ -12,7 +13,10 @@ import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
 import EntranceSequence from './components/museum/EntranceSequence'
 import { getAlgorithmById } from './data/algorithms'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
-import { SAMPLE_SORTING_DATA } from './data/sampleSorting'
+import {
+  createDefaultSortingValues,
+  createRandomSortingValues,
+} from './data/sampleSorting'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -39,6 +43,9 @@ function App() {
   const [sceneReady, setSceneReady] = useState(false)
   const [startNodeId, setStartNodeId] = useState<string | null>(null)
   const [targetNodeId, setTargetNodeId] = useState<string | null>(null)
+  const [sortingValues, setSortingValues] = useState<number[]>(() =>
+    createDefaultSortingValues(),
+  )
 
   const selectedAlgorithm = selectedAlgorithmId
     ? getAlgorithmById(selectedAlgorithmId)
@@ -65,6 +72,9 @@ function App() {
     }),
     [startNodeId, targetNodeId],
   )
+  const showingSorting = Boolean(
+    selectedAlgorithm && isSortingCategory(selectedAlgorithm.category),
+  )
   const steps = useMemo(
     () =>
       selectedAlgorithmId
@@ -72,14 +82,14 @@ function App() {
             graph: SAMPLE_GRAPH,
             startNodeId,
             targetNodeId,
-            values: SAMPLE_SORTING_DATA.values,
+            values: sortingValues,
           })
         : [],
-    [selectedAlgorithmId, startNodeId, targetNodeId],
+    [selectedAlgorithmId, startNodeId, targetNodeId, sortingValues],
   )
   const playback = useAlgorithmPlayback(
     steps,
-    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}`,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}`,
   )
   const canResetPlayback = Boolean(
     selectedAlgorithmId &&
@@ -184,6 +194,18 @@ function App() {
 
     playback.reset()
   }, [playback, selectedAlgorithmId])
+
+  const handleRandomizeArray = useCallback(() => {
+    playback.pause()
+    setSortingValues(createRandomSortingValues())
+    playback.reset()
+  }, [playback])
+
+  const handleResetArray = useCallback(() => {
+    playback.pause()
+    setSortingValues(createDefaultSortingValues())
+    playback.reset()
+  }, [playback])
 
   return (
     <div className="app">
@@ -292,6 +314,20 @@ function App() {
               onReset={handlePlaybackReset}
               allowReset={canResetPlayback}
               selectionPrompt={selectionPrompt}
+              sorting={
+                showingSorting
+                  ? {
+                      algorithmId: selectedAlgorithm.id,
+                      metrics:
+                        playback.currentStep?.sortingSnapshot?.metrics ?? null,
+                      sortedValues: playback.isComplete
+                        ? playback.currentStep?.sortingSnapshot?.values
+                        : undefined,
+                      onRandomizeArray: handleRandomizeArray,
+                      onResetArray: handleResetArray,
+                    }
+                  : undefined
+              }
             />
           </div>
         </>

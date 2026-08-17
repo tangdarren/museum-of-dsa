@@ -1,5 +1,17 @@
 import type { AlgorithmPlayback } from '../../hooks/useAlgorithmPlayback'
+import type { AlgorithmId } from '../../types/algorithm'
+import type { SortingMetrics } from '../../types/sorting'
 import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
+import SortingArrayControls from './SortingArrayControls'
+import SortingMetricsDisplay from './SortingMetricsDisplay'
+
+export type SortingPlaybackExtras = {
+  algorithmId: AlgorithmId
+  metrics: SortingMetrics | null
+  sortedValues?: number[]
+  onRandomizeArray: () => void
+  onResetArray: () => void
+}
 
 type AlgorithmPlaybackViewProps = {
   playback: AlgorithmPlayback
@@ -7,6 +19,7 @@ type AlgorithmPlaybackViewProps = {
   allowReset?: boolean
   onReset?: () => void
   selectionPrompt?: 'start' | 'target' | null
+  sorting?: SortingPlaybackExtras
 }
 
 function AlgorithmPlaybackView({
@@ -15,6 +28,7 @@ function AlgorithmPlaybackView({
   allowReset = false,
   onReset,
   selectionPrompt = null,
+  sorting,
 }: AlgorithmPlaybackViewProps) {
   const auxiliary = playback.currentStep?.auxiliaryData
   const metrics = playback.currentStep?.metrics
@@ -24,6 +38,8 @@ function AlgorithmPlaybackView({
   const isPathComplete = playback.isComplete && Boolean(pathResult)
   const isTraversalComplete =
     playback.isComplete && Boolean(traversalOrder && traversalOrder.length > 0)
+  const isSortingComplete =
+    Boolean(sorting) && playback.isComplete && Boolean(sorting?.sortedValues)
   const stepLabel = selectionPrompt === 'start'
     ? 'Select a start node'
     : selectionPrompt === 'target'
@@ -34,9 +50,11 @@ function AlgorithmPlaybackView({
           : 'No path found'
         : isTraversalComplete
           ? 'Traversal complete'
-          : playback.stepCount === 0
-            ? 'No steps'
-            : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
+          : isSortingComplete
+            ? 'Array sorted'
+            : playback.stepCount === 0
+              ? 'No steps'
+              : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
   const description = selectionPrompt === 'start'
     ? 'Select any node to begin.'
     : selectionPrompt === 'target'
@@ -67,6 +85,11 @@ function AlgorithmPlaybackView({
       {isTraversalComplete && traversalOrder ? (
         <p className="algorithm-playback-order">{traversalOrder.join(' → ')}</p>
       ) : null}
+      {isSortingComplete && sorting?.sortedValues ? (
+        <p className="algorithm-playback-order">
+          {sorting.sortedValues.join(' → ')}
+        </p>
+      ) : null}
       {inspection ? (
         <div className="algorithm-playback-inspection">
           <p className="algorithm-playback-auxiliary-label">{inspection.title}</p>
@@ -77,7 +100,13 @@ function AlgorithmPlaybackView({
           ))}
         </div>
       ) : null}
-      {metrics && !isPathComplete ? (
+      {sorting?.metrics ? (
+        <SortingMetricsDisplay
+          algorithmId={sorting.algorithmId}
+          metrics={sorting.metrics}
+          isComplete={playback.isComplete}
+        />
+      ) : metrics && !isPathComplete ? (
         <div className="algorithm-playback-metrics">
           <p className="algorithm-playback-auxiliary-label">{metrics.label}</p>
           <table>
@@ -135,6 +164,13 @@ function AlgorithmPlaybackView({
         allowReset={allowReset}
         onReset={onReset}
       />
+      {sorting ? (
+        <SortingArrayControls
+          disabled={disabled}
+          onRandomize={sorting.onRandomizeArray}
+          onReset={sorting.onResetArray}
+        />
+      ) : null}
     </section>
   )
 }

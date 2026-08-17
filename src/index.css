@@ -711,6 +711,60 @@ body {
   background: var(--teal-deep);
 }
 
+.sorting-metrics {
+  margin: 0 0 0.75rem;
+}
+
+.sorting-metrics-grid {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0;
+}
+
+.sorting-metrics-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 4.4rem;
+}
+
+.sorting-metrics-grid dt {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sorting-metrics-grid dd {
+  margin: 0;
+  color: var(--cream);
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+
+.sorting-metrics-note {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.sorting-array-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+}
+
+.sorting-array-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 @media (max-width: 1200px) {
   .algorithm-focused-ui {
     position: absolute;

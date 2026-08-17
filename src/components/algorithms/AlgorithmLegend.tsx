@@ -12,7 +12,7 @@ const GRAPH_LEGEND_ITEMS = {
 } as const
 
 const SORTING_LEGEND_ITEMS = {
-  active: { label: 'Active range', color: sortingBarStyle.active.color },
+  active: { label: 'Active', color: sortingBarStyle.active.color },
   compared: { label: 'Compared', color: sortingBarStyle.compared.color },
   written: { label: 'Moved', color: sortingBarStyle.written.color },
   pivot: { label: 'Pivot', color: sortingBarStyle.pivot.color },
@@ -31,12 +31,33 @@ const GRAPH_LEGEND_BY_ALGORITHM: Record<
 
 const SORTING_LEGEND_BY_ALGORITHM: Record<
   'bubble-sort' | 'insertion-sort' | 'quick-sort' | 'merge-sort',
-  Array<keyof typeof SORTING_LEGEND_ITEMS>
+  Array<{ key: keyof typeof SORTING_LEGEND_ITEMS; label: string }>
 > = {
-  'bubble-sort': ['active', 'compared', 'written', 'sorted'],
-  'insertion-sort': ['active', 'compared', 'written', 'sorted'],
-  'quick-sort': ['active', 'compared', 'written', 'pivot', 'sorted'],
-  'merge-sort': ['active', 'compared', 'written', 'sorted'],
+  'bubble-sort': [
+    { key: 'active', label: 'Active range' },
+    { key: 'compared', label: 'Compared' },
+    { key: 'written', label: 'Swapped' },
+    { key: 'sorted', label: 'Sorted' },
+  ],
+  'insertion-sort': [
+    { key: 'active', label: 'Insertion range' },
+    { key: 'compared', label: 'Compared' },
+    { key: 'written', label: 'Written' },
+    { key: 'sorted', label: 'Sorted' },
+  ],
+  'quick-sort': [
+    { key: 'active', label: 'Partition' },
+    { key: 'compared', label: 'Compared' },
+    { key: 'written', label: 'Swapped' },
+    { key: 'pivot', label: 'Pivot' },
+    { key: 'sorted', label: 'Sorted' },
+  ],
+  'merge-sort': [
+    { key: 'active', label: 'Merge range' },
+    { key: 'compared', label: 'Compared' },
+    { key: 'written', label: 'Written' },
+    { key: 'sorted', label: 'Sorted' },
+  ],
 }
 
 type AlgorithmLegendProps = {
@@ -47,20 +68,16 @@ function AlgorithmLegend({ algorithmId }: AlgorithmLegendProps) {
   if (isSortingAlgorithm(algorithmId)) {
     return (
       <ul className="algorithm-legend" aria-label="Sorting state legend">
-        {SORTING_LEGEND_BY_ALGORITHM[algorithmId].map((key) => {
-          const item = SORTING_LEGEND_ITEMS[key]
-
-          return (
-            <li key={key}>
-              <span
-                className="algorithm-legend-swatch"
-                style={{ backgroundColor: item.color }}
-                aria-hidden="true"
-              />
-              <span>{item.label}</span>
-            </li>
-          )
-        })}
+        {SORTING_LEGEND_BY_ALGORITHM[algorithmId].map((item) => (
+          <li key={item.key}>
+            <span
+              className="algorithm-legend-swatch"
+              style={{ backgroundColor: SORTING_LEGEND_ITEMS[item.key].color }}
+              aria-hidden="true"
+            />
+            <span>{item.label}</span>
+          </li>
+        ))}
       </ul>
     )
   }
