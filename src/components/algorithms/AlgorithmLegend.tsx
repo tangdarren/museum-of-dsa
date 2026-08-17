@@ -66,15 +66,15 @@ const SORTING_LEGEND_BY_ALGORITHM: Record<
 
 const TREE_LEGEND_ITEMS = [
   { key: 'active', label: 'Current', color: graphNodeStyle.active.color },
-  { key: 'visited', label: 'Visited', color: graphNodeStyle.visited.color },
-  { key: 'path', label: 'Path', color: graphEdgeStyle.path.color },
+  { key: 'frontier', label: 'Path', color: graphNodeStyle.frontier.color },
+  { key: 'visited', label: 'Completed', color: graphNodeStyle.visited.color },
 ] as const
 
 const BST_SEARCH_LEGEND_ITEMS = [
   { key: 'target', label: 'Target', color: graphNodeStyle.target.color },
   { key: 'active', label: 'Current', color: graphNodeStyle.active.color },
+  { key: 'frontier', label: 'Path', color: graphNodeStyle.frontier.color },
   { key: 'visited', label: 'Visited', color: graphNodeStyle.visited.color },
-  { key: 'path', label: 'Path', color: graphEdgeStyle.path.color },
   { key: 'found', label: 'Found', color: graphNodeStyle.start.color },
 ] as const
 

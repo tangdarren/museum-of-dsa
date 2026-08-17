@@ -16,6 +16,7 @@ import type { AlgorithmStep } from '../../types/algorithmStep'
 import type { GraphNodeStates } from '../../types/graph'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
 import SortVisualization from '../visualizations/sorting/SortVisualization'
+import TreeVisualization from '../visualizations/tree/TreeVisualization'
 import AmbientComputationField from './AmbientComputationField'
 
 type AlgorithmInstallationProps = {
@@ -52,6 +53,13 @@ function AlgorithmInstallation({
     ? algorithm
       ? (playbackStep?.sortingSnapshot ?? null)
       : previewConfig?.visualization === 'sorting'
+        ? previewConfig.snapshot
+        : null
+    : null
+  const treeSnapshot = showingTree
+    ? algorithm
+      ? (playbackStep?.treeSnapshot ?? null)
+      : previewConfig?.visualization === 'tree'
         ? previewConfig.snapshot
         : null
     : null
@@ -377,7 +385,11 @@ function AlgorithmInstallation({
             <group position={[0, 2.28, 0.34]} scale={2.85}>
               <SortVisualization snapshot={sortingSnapshot} />
             </group>
-          ) : showingTree ? null : (
+          ) : showingTree ? (
+            <group position={[0, 2.9, 0.36]} scale={2.62}>
+              <TreeVisualization snapshot={treeSnapshot} />
+            </group>
+          ) : (
             <group
               position={[0, 3.02, 0.23]}
               rotation={[Math.PI / 2, 0, 0]}
