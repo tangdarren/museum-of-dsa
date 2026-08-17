@@ -3,7 +3,10 @@ import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { MeshStandardMaterial, SpotLight } from 'three'
 import { mapAlgorithmStepToGraph } from '../algorithms/mapAlgorithmStepToGraph'
-import { isSortingCategory } from '../../algorithms/getAlgorithmSteps'
+import {
+  isSortingCategory,
+  isTreesCategory,
+} from '../../algorithms/getAlgorithmSteps'
 import { ALGORITHM_PREVIEWS } from '../../data/algorithmPreviews'
 import { ALGORITHM_INSTALLATION_POSITION } from '../../navigation/destinations'
 import { SAMPLE_GRAPH } from '../../data/sampleGraph'
@@ -41,6 +44,7 @@ function AlgorithmInstallation({
   const previewing = preview !== null && algorithm === null
   const previewConfig = preview && !algorithm ? ALGORITHM_PREVIEWS[preview.id] : null
   const showingSorting = displayed ? isSortingCategory(displayed.category) : false
+  const showingTree = displayed ? isTreesCategory(displayed.category) : false
   const playbackGraph = mapAlgorithmStepToGraph(playbackStep)
   const graphPreview =
     previewConfig?.visualization === 'graph' ? previewConfig : null
@@ -373,7 +377,7 @@ function AlgorithmInstallation({
             <group position={[0, 2.28, 0.34]} scale={2.85}>
               <SortVisualization snapshot={sortingSnapshot} />
             </group>
-          ) : (
+          ) : showingTree ? null : (
             <group
               position={[0, 3.02, 0.23]}
               rotation={[Math.PI / 2, 0, 0]}

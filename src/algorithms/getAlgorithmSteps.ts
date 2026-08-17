@@ -1,6 +1,7 @@
 import type { AlgorithmCategory, AlgorithmId } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphData } from '../types/graph'
+import type { TreeData } from '../types/tree'
 import { generateAStarSteps } from './generateAStarSteps'
 import { generateBfsSteps } from './generateBfsSteps'
 import { generateBubbleSortSteps } from './generateBubbleSortSteps'
@@ -9,6 +10,11 @@ import { generateDijkstraSteps } from './generateDijkstraSteps'
 import { generateInsertionSortSteps } from './generateInsertionSortSteps'
 import { generateMergeSortSteps } from './generateMergeSortSteps'
 import { generateQuickSortSteps } from './generateQuickSortSteps'
+import {
+  generateInorderTraversalSteps,
+  generatePostorderTraversalSteps,
+  generatePreorderTraversalSteps,
+} from './generateTreeTraversalSteps'
 
 export const GRAPH_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
   'bfs',
@@ -24,11 +30,18 @@ export const SORTING_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
   'merge-sort',
 ])
 
+export const TREE_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
+  'preorder-traversal',
+  'inorder-traversal',
+  'postorder-traversal',
+])
+
 export type AlgorithmRunInput = {
   graph: GraphData
   startNodeId: string | null
   targetNodeId?: string | null
   values: readonly number[]
+  tree: TreeData
 }
 
 export function isSortingAlgorithm(
@@ -41,6 +54,15 @@ export function isGraphAlgorithm(
   algorithmId: AlgorithmId,
 ): algorithmId is 'bfs' | 'dfs' | 'dijkstra' | 'astar' {
   return GRAPH_ALGORITHM_IDS.has(algorithmId)
+}
+
+export function isTreeAlgorithm(
+  algorithmId: AlgorithmId,
+): algorithmId is
+  | 'preorder-traversal'
+  | 'inorder-traversal'
+  | 'postorder-traversal' {
+  return TREE_ALGORITHM_IDS.has(algorithmId)
 }
 
 export function isSortingCategory(category: AlgorithmCategory): boolean {
@@ -111,12 +133,35 @@ function getSortingAlgorithmSteps(
   return []
 }
 
+function getTreeAlgorithmSteps(
+  algorithmId: AlgorithmId,
+  tree: TreeData,
+): AlgorithmStep[] {
+  if (algorithmId === 'preorder-traversal') {
+    return generatePreorderTraversalSteps(tree)
+  }
+
+  if (algorithmId === 'inorder-traversal') {
+    return generateInorderTraversalSteps(tree)
+  }
+
+  if (algorithmId === 'postorder-traversal') {
+    return generatePostorderTraversalSteps(tree)
+  }
+
+  return []
+}
+
 export function getAlgorithmSteps(
   algorithmId: AlgorithmId,
   input: AlgorithmRunInput,
 ): AlgorithmStep[] {
   if (isSortingAlgorithm(algorithmId)) {
     return getSortingAlgorithmSteps(algorithmId, input.values)
+  }
+
+  if (isTreeAlgorithm(algorithmId)) {
+    return getTreeAlgorithmSteps(algorithmId, input.tree)
   }
 
   return getGraphAlgorithmSteps(

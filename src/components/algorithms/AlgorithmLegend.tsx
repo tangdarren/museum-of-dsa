@@ -1,5 +1,9 @@
 import { graphEdgeStyle, graphNodeStyle, sortingBarStyle } from '../../theme/palette'
-import { isGraphAlgorithm, isSortingAlgorithm } from '../../algorithms/getAlgorithmSteps'
+import {
+  isGraphAlgorithm,
+  isSortingAlgorithm,
+  isTreeAlgorithm,
+} from '../../algorithms/getAlgorithmSteps'
 import type { AlgorithmId } from '../../types/algorithm'
 
 const GRAPH_LEGEND_ITEMS = {
@@ -60,11 +64,34 @@ const SORTING_LEGEND_BY_ALGORITHM: Record<
   ],
 }
 
+const TREE_LEGEND_ITEMS = [
+  { key: 'active', label: 'Current', color: graphNodeStyle.active.color },
+  { key: 'visited', label: 'Visited', color: graphNodeStyle.visited.color },
+  { key: 'path', label: 'Path', color: graphEdgeStyle.path.color },
+] as const
+
 type AlgorithmLegendProps = {
   algorithmId: AlgorithmId
 }
 
 function AlgorithmLegend({ algorithmId }: AlgorithmLegendProps) {
+  if (isTreeAlgorithm(algorithmId)) {
+    return (
+      <ul className="algorithm-legend" aria-label="Tree state legend">
+        {TREE_LEGEND_ITEMS.map((item) => (
+          <li key={item.key}>
+            <span
+              className="algorithm-legend-swatch"
+              style={{ backgroundColor: item.color }}
+              aria-hidden="true"
+            />
+            <span>{item.label}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   if (isSortingAlgorithm(algorithmId)) {
     return (
       <ul className="algorithm-legend" aria-label="Sorting state legend">

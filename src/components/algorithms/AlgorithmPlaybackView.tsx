@@ -34,7 +34,9 @@ function AlgorithmPlaybackView({
   const metrics = playback.currentStep?.metrics
   const inspection = playback.currentStep?.inspection
   const pathResult = playback.currentStep?.pathResult
-  const traversalOrder = playback.currentStep?.snapshot?.traversalOrder
+  const traversalOrder =
+    playback.currentStep?.snapshot?.traversalOrder ??
+    playback.currentStep?.treeSnapshot?.traversalOrder
   const isPathComplete = playback.isComplete && Boolean(pathResult)
   const isTraversalComplete =
     playback.isComplete && Boolean(traversalOrder && traversalOrder.length > 0)

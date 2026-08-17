@@ -7,8 +7,11 @@ export type AlgorithmId =
   | 'insertion-sort'
   | 'quick-sort'
   | 'merge-sort'
+  | 'preorder-traversal'
+  | 'inorder-traversal'
+  | 'postorder-traversal'
 
-export type FutureAlgorithmId = 'bst-search' | 'bst-insert' | 'inorder-traversal'
+export type FutureAlgorithmId = 'bst-search' | 'bst-insert'
 
 export type AlgorithmCategory = 'Graph Traversal' | 'Pathfinding' | 'Sorting' | 'Trees'
 
@@ -20,7 +23,7 @@ export type AlgorithmComplexity = {
 export type AlgorithmDefinition = {
   id: AlgorithmId
   title: string
-  category: Exclude<AlgorithmCategory, 'Trees'>
+  category: AlgorithmCategory
   shortDescription: string
   explore: [string, string, string]
   complexity: AlgorithmComplexity

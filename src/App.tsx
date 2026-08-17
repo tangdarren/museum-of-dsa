@@ -17,6 +17,7 @@ import {
   createDefaultSortingValues,
   createRandomSortingValues,
 } from './data/sampleSorting'
+import { SAMPLE_TREE } from './data/sampleTree'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -83,6 +84,7 @@ function App() {
             startNodeId,
             targetNodeId,
             values: sortingValues,
+            tree: SAMPLE_TREE,
           })
         : [],
     [selectedAlgorithmId, startNodeId, targetNodeId, sortingValues],

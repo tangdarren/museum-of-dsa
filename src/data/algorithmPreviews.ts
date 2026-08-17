@@ -1,7 +1,12 @@
+import { copyTreeEdges, copyTreeNodes } from '../algorithms/treeShared'
 import type { AlgorithmId } from '../types/algorithm'
-import type { AlgorithmSortingSnapshot } from '../types/algorithmStep'
+import type {
+  AlgorithmSortingSnapshot,
+  AlgorithmTreeSnapshot,
+} from '../types/algorithmStep'
 import type { GraphEdgeStates, GraphNodeStates } from '../types/graph'
 import { SAMPLE_SORTING_DATA } from './sampleSorting'
+import { SAMPLE_TREE } from './sampleTree'
 
 export type GraphAlgorithmPreview = {
   visualization: 'graph'
@@ -15,7 +20,15 @@ export type SortingAlgorithmPreview = {
   snapshot: AlgorithmSortingSnapshot
 }
 
-export type AlgorithmPreview = GraphAlgorithmPreview | SortingAlgorithmPreview
+export type TreeAlgorithmPreview = {
+  visualization: 'tree'
+  snapshot: AlgorithmTreeSnapshot
+}
+
+export type AlgorithmPreview =
+  | GraphAlgorithmPreview
+  | SortingAlgorithmPreview
+  | TreeAlgorithmPreview
 
 const SORTING_PREVIEW_VALUES = [...SAMPLE_SORTING_DATA.values]
 
@@ -125,6 +138,51 @@ export const ALGORITHM_PREVIEWS: Record<AlgorithmId, AlgorithmPreview> = {
         { start: 4, end: 7 },
       ],
       sortedIndices: [0, 1, 2, 3],
+    },
+  },
+  'preorder-traversal': {
+    visualization: 'tree',
+    snapshot: {
+      rootNodeId: SAMPLE_TREE.rootId,
+      nodes: copyTreeNodes(SAMPLE_TREE.nodes),
+      edges: copyTreeEdges(SAMPLE_TREE.edges),
+      metrics: { comparisons: 4, visits: 2 },
+      currentNodeId: '4',
+      visitedNodeIds: ['8'],
+      pathNodeIds: ['8', '4'],
+      activeEdgeIds: ['8-4'],
+      visitedEdgeIds: ['8-4'],
+      traversalOrder: ['8', '4'],
+    },
+  },
+  'inorder-traversal': {
+    visualization: 'tree',
+    snapshot: {
+      rootNodeId: SAMPLE_TREE.rootId,
+      nodes: copyTreeNodes(SAMPLE_TREE.nodes),
+      edges: copyTreeEdges(SAMPLE_TREE.edges),
+      metrics: { comparisons: 4, visits: 2 },
+      currentNodeId: '4',
+      visitedNodeIds: ['2'],
+      pathNodeIds: ['8', '4'],
+      activeEdgeIds: [],
+      visitedEdgeIds: ['8-4', '4-2'],
+      traversalOrder: ['2', '4'],
+    },
+  },
+  'postorder-traversal': {
+    visualization: 'tree',
+    snapshot: {
+      rootNodeId: SAMPLE_TREE.rootId,
+      nodes: copyTreeNodes(SAMPLE_TREE.nodes),
+      edges: copyTreeEdges(SAMPLE_TREE.edges),
+      metrics: { comparisons: 6, visits: 3 },
+      currentNodeId: '4',
+      visitedNodeIds: ['2', '6'],
+      pathNodeIds: ['8', '4'],
+      activeEdgeIds: [],
+      visitedEdgeIds: ['8-4', '4-2', '4-6'],
+      traversalOrder: ['2', '6', '4'],
     },
   },
 }

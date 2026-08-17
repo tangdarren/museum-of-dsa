@@ -79,6 +79,33 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     complexity: { time: 'O(n log n)', space: 'O(n)' },
     available: true,
   },
+  {
+    id: 'preorder-traversal',
+    title: 'Preorder Traversal',
+    category: 'Trees',
+    shortDescription: 'Visits a node before walking its left and right subtrees.',
+    explore: ['Visit order', 'Left subtree', 'Right subtree'],
+    complexity: { time: 'O(n)', space: 'O(h)' },
+    available: true,
+  },
+  {
+    id: 'inorder-traversal',
+    title: 'Inorder Traversal',
+    category: 'Trees',
+    shortDescription: 'Visits the left subtree, then the node, then the right subtree.',
+    explore: ['Left subtree', 'Visit order', 'Sorted BST order'],
+    complexity: { time: 'O(n)', space: 'O(h)' },
+    available: true,
+  },
+  {
+    id: 'postorder-traversal',
+    title: 'Postorder Traversal',
+    category: 'Trees',
+    shortDescription: 'Walks both subtrees before recording the node.',
+    explore: ['Left subtree', 'Right subtree', 'Visit order'],
+    complexity: { time: 'O(n)', space: 'O(h)' },
+    available: true,
+  },
 ]
 
 export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
@@ -94,13 +121,6 @@ export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
     title: 'BST Insert',
     category: 'Trees',
     shortDescription: 'Places a value by following left and right child links.',
-    available: false,
-  },
-  {
-    id: 'inorder-traversal',
-    title: 'Inorder Traversal',
-    category: 'Trees',
-    shortDescription: 'Visits nodes from left to right, producing sorted order in a BST.',
     available: false,
   },
 ]
@@ -123,7 +143,10 @@ export const ALGORITHM_SECTIONS: {
   },
   {
     category: 'Trees',
-    entries: FUTURE_TREE_ALGORITHMS,
+    entries: [
+      ...ALGORITHMS.filter((algorithm) => algorithm.category === 'Trees'),
+      ...FUTURE_TREE_ALGORITHMS,
+    ],
   },
 ]
 
