@@ -185,4 +185,23 @@ export const ALGORITHM_PREVIEWS: Record<AlgorithmId, AlgorithmPreview> = {
       traversalOrder: ['2', '6', '4'],
     },
   },
+  'bst-search': {
+    visualization: 'tree',
+    snapshot: {
+      rootNodeId: SAMPLE_TREE.rootId,
+      nodes: copyTreeNodes(SAMPLE_TREE.nodes),
+      edges: copyTreeEdges(SAMPLE_TREE.edges),
+      metrics: { comparisons: 2, visits: 2 },
+      currentNodeId: '4',
+      targetNodeId: '6',
+      targetValue: 6,
+      visitedNodeIds: ['8'],
+      pathNodeIds: ['8', '4'],
+      comparedNodeIds: ['4'],
+      activeEdgeIds: ['8-4'],
+      visitedEdgeIds: ['8-4'],
+      pathEdgeIds: ['8-4'],
+      comparisonDirection: 'left',
+    },
+  },
 }

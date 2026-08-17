@@ -14,6 +14,9 @@ export type TreeSnapshotHighlights = {
   visitedEdgeIds?: string[]
   pathEdgeIds?: string[]
   traversalOrder?: string[]
+  targetValue?: number
+  comparisonDirection?: 'left' | 'right' | 'equal'
+  searchResult?: 'found' | 'not-found'
 }
 
 function copyIdList(values?: string[]) {
@@ -115,6 +118,9 @@ export function copyTreeSnapshot(
     visitedEdgeIds: copyIdList(snapshot.visitedEdgeIds),
     pathEdgeIds: copyIdList(snapshot.pathEdgeIds),
     traversalOrder: copyIdList(snapshot.traversalOrder),
+    targetValue: snapshot.targetValue,
+    comparisonDirection: snapshot.comparisonDirection,
+    searchResult: snapshot.searchResult,
   }
 }
 
@@ -141,6 +147,9 @@ export function createTreeSnapshot(
     visitedEdgeIds: copyIdList(highlights.visitedEdgeIds),
     pathEdgeIds: copyIdList(highlights.pathEdgeIds),
     traversalOrder: copyIdList(highlights.traversalOrder),
+    targetValue: highlights.targetValue,
+    comparisonDirection: highlights.comparisonDirection,
+    searchResult: highlights.searchResult,
   }
 }
 

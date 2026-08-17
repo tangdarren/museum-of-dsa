@@ -765,6 +765,21 @@ body {
   gap: 0.45rem;
 }
 
+.tree-search-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+}
+
+.tree-search-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 @media (max-width: 1200px) {
   .algorithm-focused-ui {
     position: absolute;

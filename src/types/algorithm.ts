@@ -10,8 +10,9 @@ export type AlgorithmId =
   | 'preorder-traversal'
   | 'inorder-traversal'
   | 'postorder-traversal'
+  | 'bst-search'
 
-export type FutureAlgorithmId = 'bst-search' | 'bst-insert'
+export type FutureAlgorithmId = 'bst-insert'
 
 export type AlgorithmCategory = 'Graph Traversal' | 'Pathfinding' | 'Sorting' | 'Trees'
 

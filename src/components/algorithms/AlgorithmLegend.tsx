@@ -70,15 +70,26 @@ const TREE_LEGEND_ITEMS = [
   { key: 'path', label: 'Path', color: graphEdgeStyle.path.color },
 ] as const
 
+const BST_SEARCH_LEGEND_ITEMS = [
+  { key: 'target', label: 'Target', color: graphNodeStyle.target.color },
+  { key: 'active', label: 'Current', color: graphNodeStyle.active.color },
+  { key: 'visited', label: 'Visited', color: graphNodeStyle.visited.color },
+  { key: 'path', label: 'Path', color: graphEdgeStyle.path.color },
+  { key: 'found', label: 'Found', color: graphNodeStyle.start.color },
+] as const
+
 type AlgorithmLegendProps = {
   algorithmId: AlgorithmId
 }
 
 function AlgorithmLegend({ algorithmId }: AlgorithmLegendProps) {
   if (isTreeAlgorithm(algorithmId)) {
+    const items =
+      algorithmId === 'bst-search' ? BST_SEARCH_LEGEND_ITEMS : TREE_LEGEND_ITEMS
+
     return (
       <ul className="algorithm-legend" aria-label="Tree state legend">
-        {TREE_LEGEND_ITEMS.map((item) => (
+        {items.map((item) => (
           <li key={item.key}>
             <span
               className="algorithm-legend-swatch"

@@ -4,6 +4,7 @@ import type { SortingMetrics } from '../../types/sorting'
 import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
 import SortingArrayControls from './SortingArrayControls'
 import SortingMetricsDisplay from './SortingMetricsDisplay'
+import TreeSearchControls from './TreeSearchControls'
 
 export type SortingPlaybackExtras = {
   algorithmId: AlgorithmId
@@ -13,6 +14,13 @@ export type SortingPlaybackExtras = {
   onResetArray: () => void
 }
 
+export type TreeSearchPlaybackExtras = {
+  targetValue: number
+  presentValues: number[]
+  missingValues: number[]
+  onSelectTarget: (value: number) => void
+}
+
 type AlgorithmPlaybackViewProps = {
   playback: AlgorithmPlayback
   disabled?: boolean
@@ -20,6 +28,7 @@ type AlgorithmPlaybackViewProps = {
   onReset?: () => void
   selectionPrompt?: 'start' | 'target' | null
   sorting?: SortingPlaybackExtras
+  treeSearch?: TreeSearchPlaybackExtras
 }
 
 function AlgorithmPlaybackView({
@@ -29,6 +38,7 @@ function AlgorithmPlaybackView({
   onReset,
   selectionPrompt = null,
   sorting,
+  treeSearch,
 }: AlgorithmPlaybackViewProps) {
   const auxiliary = playback.currentStep?.auxiliaryData
   const metrics = playback.currentStep?.metrics
@@ -37,7 +47,14 @@ function AlgorithmPlaybackView({
   const traversalOrder =
     playback.currentStep?.snapshot?.traversalOrder ??
     playback.currentStep?.treeSnapshot?.traversalOrder
-  const isPathComplete = playback.isComplete && Boolean(pathResult)
+  const isPathComplete =
+    playback.isComplete &&
+    Boolean(pathResult) &&
+    Boolean(playback.currentStep?.snapshot)
+  const isTreeSearchComplete =
+    playback.isComplete &&
+    Boolean(pathResult) &&
+    Boolean(playback.currentStep?.treeSnapshot)
   const isTraversalComplete =
     playback.isComplete && Boolean(traversalOrder && traversalOrder.length > 0)
   const isSortingComplete =
@@ -50,13 +67,17 @@ function AlgorithmPlaybackView({
         ? pathResult?.found
           ? 'Path found'
           : 'No path found'
-        : isTraversalComplete
-          ? 'Traversal complete'
-          : isSortingComplete
-            ? 'Array sorted'
-            : playback.stepCount === 0
-              ? 'No steps'
-              : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
+        : isTreeSearchComplete
+          ? pathResult?.found
+            ? 'Value found'
+            : 'Value not found'
+          : isTraversalComplete
+            ? 'Traversal complete'
+            : isSortingComplete
+              ? 'Array sorted'
+              : playback.stepCount === 0
+                ? 'No steps'
+                : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
   const description = selectionPrompt === 'start'
     ? 'Select any node to begin.'
     : selectionPrompt === 'target'
@@ -80,6 +101,20 @@ function AlgorithmPlaybackView({
           {pathResult.exploredCount !== undefined ? (
             <p className="algorithm-playback-cost">
               Nodes explored {pathResult.exploredCount}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {isTreeSearchComplete && pathResult ? (
+        <div className="algorithm-playback-summary">
+          {pathResult.nodes.length > 0 ? (
+            <p className="algorithm-playback-order">
+              {pathResult.nodes.join(' → ')}
+            </p>
+          ) : null}
+          {pathResult.exploredCount !== undefined ? (
+            <p className="algorithm-playback-cost">
+              Nodes compared {pathResult.exploredCount}
             </p>
           ) : null}
         </div>
@@ -108,7 +143,7 @@ function AlgorithmPlaybackView({
           metrics={sorting.metrics}
           isComplete={playback.isComplete}
         />
-      ) : metrics && !isPathComplete ? (
+      ) : metrics && !isPathComplete && !isTreeSearchComplete ? (
         <div className="algorithm-playback-metrics">
           <p className="algorithm-playback-auxiliary-label">{metrics.label}</p>
           <table>
@@ -171,6 +206,15 @@ function AlgorithmPlaybackView({
           disabled={disabled}
           onRandomize={sorting.onRandomizeArray}
           onReset={sorting.onResetArray}
+        />
+      ) : null}
+      {treeSearch ? (
+        <TreeSearchControls
+          disabled={disabled}
+          targetValue={treeSearch.targetValue}
+          presentValues={treeSearch.presentValues}
+          missingValues={treeSearch.missingValues}
+          onSelectTarget={treeSearch.onSelectTarget}
         />
       ) : null}
     </section>

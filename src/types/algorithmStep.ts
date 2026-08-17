@@ -73,6 +73,9 @@ export type AlgorithmTreeSnapshot = {
   visitedEdgeIds?: string[]
   pathEdgeIds?: string[]
   traversalOrder?: string[]
+  targetValue?: number
+  comparisonDirection?: 'left' | 'right' | 'equal'
+  searchResult?: 'found' | 'not-found'
 }
 
 export type AlgorithmStep = {

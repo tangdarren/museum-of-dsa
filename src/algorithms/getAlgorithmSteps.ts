@@ -4,6 +4,7 @@ import type { GraphData } from '../types/graph'
 import type { TreeData } from '../types/tree'
 import { generateAStarSteps } from './generateAStarSteps'
 import { generateBfsSteps } from './generateBfsSteps'
+import { generateBstSearchSteps } from './generateBstSearchSteps'
 import { generateBubbleSortSteps } from './generateBubbleSortSteps'
 import { generateDfsSteps } from './generateDfsSteps'
 import { generateDijkstraSteps } from './generateDijkstraSteps'
@@ -34,6 +35,7 @@ export const TREE_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
   'preorder-traversal',
   'inorder-traversal',
   'postorder-traversal',
+  'bst-search',
 ])
 
 export type AlgorithmRunInput = {
@@ -42,6 +44,7 @@ export type AlgorithmRunInput = {
   targetNodeId?: string | null
   values: readonly number[]
   tree: TreeData
+  targetValue?: number | null
 }
 
 export function isSortingAlgorithm(
@@ -61,7 +64,8 @@ export function isTreeAlgorithm(
 ): algorithmId is
   | 'preorder-traversal'
   | 'inorder-traversal'
-  | 'postorder-traversal' {
+  | 'postorder-traversal'
+  | 'bst-search' {
   return TREE_ALGORITHM_IDS.has(algorithmId)
 }
 
@@ -79,6 +83,10 @@ export function usesStartNodeSelection(algorithmId: AlgorithmId): boolean {
 
 export function usesTargetNodeSelection(algorithmId: AlgorithmId): boolean {
   return algorithmId === 'dijkstra' || algorithmId === 'astar'
+}
+
+export function usesTreeTargetSelection(algorithmId: AlgorithmId): boolean {
+  return algorithmId === 'bst-search'
 }
 
 function getGraphAlgorithmSteps(
@@ -136,6 +144,7 @@ function getSortingAlgorithmSteps(
 function getTreeAlgorithmSteps(
   algorithmId: AlgorithmId,
   tree: TreeData,
+  targetValue: number | null,
 ): AlgorithmStep[] {
   if (algorithmId === 'preorder-traversal') {
     return generatePreorderTraversalSteps(tree)
@@ -147,6 +156,10 @@ function getTreeAlgorithmSteps(
 
   if (algorithmId === 'postorder-traversal') {
     return generatePostorderTraversalSteps(tree)
+  }
+
+  if (algorithmId === 'bst-search') {
+    return targetValue === null ? [] : generateBstSearchSteps(tree, targetValue)
   }
 
   return []
@@ -161,7 +174,11 @@ export function getAlgorithmSteps(
   }
 
   if (isTreeAlgorithm(algorithmId)) {
-    return getTreeAlgorithmSteps(algorithmId, input.tree)
+    return getTreeAlgorithmSteps(
+      algorithmId,
+      input.tree,
+      input.targetValue ?? null,
+    )
   }
 
   return getGraphAlgorithmSteps(

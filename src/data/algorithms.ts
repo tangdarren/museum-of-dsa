@@ -106,16 +106,18 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     complexity: { time: 'O(n)', space: 'O(h)' },
     available: true,
   },
-]
-
-export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
   {
     id: 'bst-search',
     title: 'BST Search',
     category: 'Trees',
     shortDescription: 'Finds a value by comparing it with each node and going left or right.',
-    available: false,
+    explore: ['Value comparisons', 'Left and right links', 'Found or missing values'],
+    complexity: { time: 'O(h)', space: 'O(1)' },
+    available: true,
   },
+]
+
+export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
   {
     id: 'bst-insert',
     title: 'BST Insert',

@@ -5,6 +5,7 @@ import {
   isSortingCategory,
   usesStartNodeSelection,
   usesTargetNodeSelection,
+  usesTreeTargetSelection,
 } from './algorithms/getAlgorithmSteps'
 import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
@@ -17,7 +18,11 @@ import {
   createDefaultSortingValues,
   createRandomSortingValues,
 } from './data/sampleSorting'
-import { SAMPLE_TREE } from './data/sampleTree'
+import {
+  SAMPLE_TREE,
+  createDefaultTreeSearchTarget,
+  getTreeSearchTargetGroups,
+} from './data/sampleTree'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -46,6 +51,13 @@ function App() {
   const [targetNodeId, setTargetNodeId] = useState<string | null>(null)
   const [sortingValues, setSortingValues] = useState<number[]>(() =>
     createDefaultSortingValues(),
+  )
+  const [treeTargetValue, setTreeTargetValue] = useState(() =>
+    createDefaultTreeSearchTarget(SAMPLE_TREE),
+  )
+  const treeSearchTargets = useMemo(
+    () => getTreeSearchTargetGroups(SAMPLE_TREE),
+    [],
   )
 
   const selectedAlgorithm = selectedAlgorithmId
@@ -76,6 +88,9 @@ function App() {
   const showingSorting = Boolean(
     selectedAlgorithm && isSortingCategory(selectedAlgorithm.category),
   )
+  const showingTreeSearch = Boolean(
+    selectedAlgorithmId && usesTreeTargetSelection(selectedAlgorithmId),
+  )
   const steps = useMemo(
     () =>
       selectedAlgorithmId
@@ -85,13 +100,14 @@ function App() {
             targetNodeId,
             values: sortingValues,
             tree: SAMPLE_TREE,
+            targetValue: treeTargetValue,
           })
         : [],
-    [selectedAlgorithmId, startNodeId, targetNodeId, sortingValues],
+    [selectedAlgorithmId, startNodeId, targetNodeId, sortingValues, treeTargetValue],
   )
   const playback = useAlgorithmPlayback(
     steps,
-    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}`,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}:${treeTargetValue}`,
   )
   const canResetPlayback = Boolean(
     selectedAlgorithmId &&
@@ -208,6 +224,15 @@ function App() {
     setSortingValues(createDefaultSortingValues())
     playback.reset()
   }, [playback])
+
+  const handleSelectTreeSearchTarget = useCallback(
+    (value: number) => {
+      playback.pause()
+      setTreeTargetValue(value)
+      playback.reset()
+    },
+    [playback],
+  )
 
   return (
     <div className="app">
@@ -327,6 +352,16 @@ function App() {
                         : undefined,
                       onRandomizeArray: handleRandomizeArray,
                       onResetArray: handleResetArray,
+                    }
+                  : undefined
+              }
+              treeSearch={
+                showingTreeSearch
+                  ? {
+                      targetValue: treeTargetValue,
+                      presentValues: treeSearchTargets.present,
+                      missingValues: treeSearchTargets.missing,
+                      onSelectTarget: handleSelectTreeSearchTarget,
                     }
                   : undefined
               }
