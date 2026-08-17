@@ -3,6 +3,7 @@ import type {
   AlgorithmCategory,
   AlgorithmDefinition,
   AlgorithmId,
+  FutureAlgorithmDefinition,
 } from '../types/algorithm'
 
 export const ALGORITHMS: AlgorithmDefinition[] = [
@@ -80,6 +81,30 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
   },
 ]
 
+export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
+  {
+    id: 'bst-search',
+    title: 'BST Search',
+    category: 'Trees',
+    shortDescription: 'Finds a value by comparing it with each node and going left or right.',
+    available: false,
+  },
+  {
+    id: 'bst-insert',
+    title: 'BST Insert',
+    category: 'Trees',
+    shortDescription: 'Places a value by following left and right child links.',
+    available: false,
+  },
+  {
+    id: 'inorder-traversal',
+    title: 'Inorder Traversal',
+    category: 'Trees',
+    shortDescription: 'Visits nodes from left to right, producing sorted order in a BST.',
+    available: false,
+  },
+]
+
 export const ALGORITHM_SECTIONS: {
   category: AlgorithmCategory
   entries: AlgorithmCatalogEntry[]
@@ -95,6 +120,10 @@ export const ALGORITHM_SECTIONS: {
   {
     category: 'Sorting',
     entries: ALGORITHMS.filter((algorithm) => algorithm.category === 'Sorting'),
+  },
+  {
+    category: 'Trees',
+    entries: FUTURE_TREE_ALGORITHMS,
   },
 ]
 

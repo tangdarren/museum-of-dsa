@@ -1,5 +1,6 @@
 import type { GraphEdgeStates, GraphNodeStates } from './graph'
 import type { SortingIndexRange, SortingMetrics } from './sorting'
+import type { TreeEdge, TreeMetrics, TreeNode } from './tree'
 
 export type AlgorithmAuxiliaryData = {
   label: string
@@ -55,11 +56,31 @@ export type AlgorithmSortingSnapshot = {
   sortedIndices?: number[]
 }
 
+export type AlgorithmTreeSnapshot = {
+  rootNodeId: string | null
+  nodes: TreeNode[]
+  edges: TreeEdge[]
+  metrics: TreeMetrics
+  currentNodeId?: string
+  targetNodeId?: string
+  visitedNodeIds?: string[]
+  frontierNodeIds?: string[]
+  pathNodeIds?: string[]
+  comparedNodeIds?: string[]
+  foundNodeId?: string
+  insertingNodeId?: string
+  activeEdgeIds?: string[]
+  visitedEdgeIds?: string[]
+  pathEdgeIds?: string[]
+  traversalOrder?: string[]
+}
+
 export type AlgorithmStep = {
   id: string
   description: string
   snapshot?: AlgorithmGraphSnapshot
   sortingSnapshot?: AlgorithmSortingSnapshot
+  treeSnapshot?: AlgorithmTreeSnapshot
   nodeStates?: GraphNodeStates
   edgeStates?: GraphEdgeStates
   auxiliaryData?: AlgorithmAuxiliaryData

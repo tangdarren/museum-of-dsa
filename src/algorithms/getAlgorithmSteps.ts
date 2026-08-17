@@ -47,6 +47,10 @@ export function isSortingCategory(category: AlgorithmCategory): boolean {
   return category === 'Sorting'
 }
 
+export function isTreesCategory(category: AlgorithmCategory): boolean {
+  return category === 'Trees'
+}
+
 export function usesStartNodeSelection(algorithmId: AlgorithmId): boolean {
   return isGraphAlgorithm(algorithmId)
 }

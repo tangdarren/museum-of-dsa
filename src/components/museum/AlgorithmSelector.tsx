@@ -48,23 +48,35 @@ function AlgorithmSelector({
         <section key={section.category} className="algorithm-selector-section">
           <h3>{section.category}</h3>
           <div className="algorithm-selector-list">
-            {section.entries.map((entry) => (
-              <button
-                key={entry.id}
-                type="button"
-                className={
-                  previewId === entry.id
-                    ? 'algorithm-option is-previewed'
-                    : 'algorithm-option'
-                }
-                onClick={() => onSelect(entry.id)}
-                onMouseEnter={() => onPreview(entry.id)}
-                onFocus={() => onPreview(entry.id)}
-                disabled={disabled}
-              >
-                {entry.title}
-              </button>
-            ))}
+            {section.entries.map((entry) =>
+              entry.available ? (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className={
+                    previewId === entry.id
+                      ? 'algorithm-option is-previewed'
+                      : 'algorithm-option'
+                  }
+                  onClick={() => onSelect(entry.id)}
+                  onMouseEnter={() => onPreview(entry.id)}
+                  onFocus={() => onPreview(entry.id)}
+                  disabled={disabled}
+                >
+                  {entry.title}
+                </button>
+              ) : (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className="algorithm-option is-unavailable"
+                  disabled
+                >
+                  <span>{entry.title}</span>
+                  <span>Coming Soon</span>
+                </button>
+              ),
+            )}
           </div>
         </section>
       ))}
