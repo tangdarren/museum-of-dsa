@@ -111,7 +111,7 @@ export function generateBstSearchSteps(
           state.metrics.visits,
         ),
         auxiliaryData: {
-          label: 'Path',
+          label: 'Search path',
           values: extras.auxiliaryValues ?? pathLabels(),
           emphasis: 'last',
         },

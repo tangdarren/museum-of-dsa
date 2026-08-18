@@ -9,10 +9,11 @@ import {
 } from './algorithms/getAlgorithmSteps'
 import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
+import AlgorithmGalleryUi from './components/museum/AlgorithmGalleryUi'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
 import EntranceSequence from './components/museum/EntranceSequence'
-import { getAlgorithmById } from './data/algorithms'
+import { getAlgorithmById, getGalleryEntries } from './data/algorithms'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
 import {
   createDefaultSortingValues,
@@ -31,14 +32,16 @@ import {
   type MuseumLocation,
 } from './navigation/destinations'
 import MuseumScene from './scenes/MuseumScene'
-import type { AlgorithmId } from './types/algorithm'
+import type { AlgorithmCategory, AlgorithmId } from './types/algorithm'
 
-type AlgorithmViewPhase = 'transitioning' | 'overview' | 'focused'
+type AlgorithmViewPhase = 'transitioning' | 'overview' | 'gallery' | 'focused'
 
 function App() {
   const [location, setLocation] = useState<MuseumLocation>('entrance')
   const [selectedAlgorithmId, setSelectedAlgorithmId] =
     useState<AlgorithmId | null>(null)
+  const [selectedGallery, setSelectedGallery] =
+    useState<AlgorithmCategory | null>(null)
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [previewAlgorithmId, setPreviewAlgorithmId] =
     useState<AlgorithmId | null>(null)
@@ -66,7 +69,11 @@ function App() {
   const previewAlgorithm = previewAlgorithmId
     ? getAlgorithmById(previewAlgorithmId)
     : null
-  const destination = getMuseumDestination(location, selectedAlgorithmId)
+  const destination = getMuseumDestination(
+    location,
+    selectedAlgorithmId,
+    selectedGallery,
+  )
   const needsTarget = Boolean(
     selectedAlgorithmId && usesTargetNodeSelection(selectedAlgorithmId),
   )
@@ -120,7 +127,9 @@ function App() {
       ? 'transitioning'
       : selectedAlgorithmId
         ? 'focused'
-        : 'overview'
+        : selectedGallery
+          ? 'gallery'
+          : 'overview'
 
   const goToLocation = useCallback(
     (next: MuseumLocation) => {
@@ -133,6 +142,7 @@ function App() {
       }
 
       setSelectedAlgorithmId(null)
+      setSelectedGallery(null)
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
       setTargetNodeId(null)
@@ -154,7 +164,7 @@ function App() {
   }, [enterButton, isTransitioning])
 
   const handleSelectAlgorithm = useCallback(
-    (id: AlgorithmId) => {
+    (id: AlgorithmId, gallery?: AlgorithmCategory) => {
       if (isTransitioning) {
         return
       }
@@ -163,10 +173,36 @@ function App() {
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
       setTargetNodeId(null)
+
+      if (gallery) {
+        setSelectedGallery(gallery)
+      }
+
       setSelectedAlgorithmId(id)
       setIsTransitioning(true)
     },
     [isTransitioning],
+  )
+
+  const handleSelectGallery = useCallback(
+    (category: AlgorithmCategory) => {
+      if (isTransitioning) {
+        return
+      }
+
+      if (selectedGallery === category && !selectedAlgorithmId) {
+        return
+      }
+
+      setSelectorOpen(false)
+      setPreviewAlgorithmId(null)
+      setSelectedAlgorithmId(null)
+      setStartNodeId(null)
+      setTargetNodeId(null)
+      setSelectedGallery(category)
+      setIsTransitioning(true)
+    },
+    [isTransitioning, selectedAlgorithmId, selectedGallery],
   )
 
   const handleBackToAlgorithms = useCallback(() => {
@@ -178,6 +214,17 @@ function App() {
     setPreviewAlgorithmId(null)
     setStartNodeId(null)
     setTargetNodeId(null)
+    setSelectorOpen(false)
+    setIsTransitioning(true)
+  }, [isTransitioning])
+
+  const handleBackToHall = useCallback(() => {
+    if (isTransitioning) {
+      return
+    }
+
+    setSelectedGallery(null)
+    setPreviewAlgorithmId(null)
     setSelectorOpen(false)
     setIsTransitioning(true)
   }, [isTransitioning])
@@ -256,7 +303,9 @@ function App() {
           location={location}
           selectedAlgorithm={selectedAlgorithm}
           previewAlgorithm={
-            algorithmViewPhase === 'overview' ? previewAlgorithm : null
+            algorithmViewPhase === 'overview' || algorithmViewPhase === 'gallery'
+              ? previewAlgorithm
+              : null
           }
           playbackStep={selectedAlgorithm ? playback.currentStep : null}
           selectionPrompt={
@@ -271,6 +320,14 @@ function App() {
               : undefined
           }
           onSelectAlgorithms={() => goToLocation('algorithms')}
+          selectedGallery={selectedGallery}
+          onSelectGallery={handleSelectGallery}
+          onSelectGalleryAlgorithm={handleSelectAlgorithm}
+          galleryInteractive={
+            location === 'algorithms' &&
+            !selectedAlgorithmId &&
+            !isTransitioning
+          }
           isTransitioning={isTransitioning}
           showEntranceLettering={enterButton === 'gone'}
         />
@@ -324,6 +381,24 @@ function App() {
           )}
         </>
       ) : null}
+      {algorithmViewPhase === 'gallery' && selectedGallery ? (
+        <>
+          <button
+            type="button"
+            className="museum-button lobby-button"
+            onClick={handleBackToHall}
+          >
+            ← Algorithms
+          </button>
+          <AlgorithmGalleryUi
+            category={selectedGallery}
+            entries={getGalleryEntries(selectedGallery)}
+            previewId={previewAlgorithmId}
+            onPreview={setPreviewAlgorithmId}
+            onSelect={(id) => handleSelectAlgorithm(id, selectedGallery)}
+          />
+        </>
+      ) : null}
       {algorithmViewPhase === 'focused' && selectedAlgorithm ? (
         <>
           <button
@@ -331,7 +406,7 @@ function App() {
             className="museum-button lobby-button"
             onClick={handleBackToAlgorithms}
           >
-            ← Algorithms
+            {selectedGallery ? `← ${selectedGallery}` : '← Algorithms'}
           </button>
           <AlgorithmLegend algorithmId={selectedAlgorithm.id} />
           <div className="algorithm-focused-ui">

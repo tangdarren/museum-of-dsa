@@ -108,19 +108,30 @@ function AlgorithmPlaybackView({
       {isTreeSearchComplete && pathResult ? (
         <div className="algorithm-playback-summary">
           {pathResult.nodes.length > 0 ? (
-            <p className="algorithm-playback-order">
-              {pathResult.nodes.join(' → ')}
-            </p>
+            <>
+              <p className="algorithm-playback-auxiliary-label">Search path</p>
+              <p className="algorithm-playback-order">
+                {pathResult.nodes.join(' → ')}
+              </p>
+            </>
           ) : null}
           {pathResult.exploredCount !== undefined ? (
             <p className="algorithm-playback-cost">
-              Nodes compared {pathResult.exploredCount}
+              Nodes visited {pathResult.exploredCount}
             </p>
           ) : null}
         </div>
       ) : null}
       {isTraversalComplete && traversalOrder ? (
-        <p className="algorithm-playback-order">{traversalOrder.join(' → ')}</p>
+        <div className="algorithm-playback-summary">
+          <p className="algorithm-playback-auxiliary-label">Traversal order</p>
+          <p className="algorithm-playback-order">
+            {traversalOrder.join(' → ')}
+          </p>
+          <p className="algorithm-playback-cost">
+            Nodes visited {traversalOrder.length}
+          </p>
+        </div>
       ) : null}
       {isSortingComplete && sorting?.sortedValues ? (
         <p className="algorithm-playback-order">
@@ -143,7 +154,7 @@ function AlgorithmPlaybackView({
           metrics={sorting.metrics}
           isComplete={playback.isComplete}
         />
-      ) : metrics && !isPathComplete && !isTreeSearchComplete ? (
+      ) : metrics && !isPathComplete && !isTreeSearchComplete && !isTraversalComplete ? (
         <div className="algorithm-playback-metrics">
           <p className="algorithm-playback-auxiliary-label">{metrics.label}</p>
           <table>

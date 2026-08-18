@@ -7,13 +7,16 @@ import type {
   HemisphereLight,
   SpotLight,
 } from 'three'
+import AlgorithmGalleryPanel from '../components/museum/AlgorithmGalleryPanel'
 import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
 import MuseumSign from '../components/museum/MuseumSign'
+import { ALGORITHM_SECTIONS } from '../data/algorithms'
 import { museum } from '../theme/palette'
-import type { AlgorithmDefinition } from '../types/algorithm'
+import type { AlgorithmCategory, AlgorithmDefinition, AlgorithmId } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphNodeStates } from '../types/graph'
 import {
+  ALGORITHM_GALLERY_PLACEMENTS,
   ALGORITHMS_BACK,
   ALGORITHMS_CENTER_X,
   ALGORITHMS_CENTER_Z,
@@ -366,6 +369,10 @@ type MuseumSceneProps = {
   setupNodeStates?: GraphNodeStates
   onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
+  selectedGallery?: AlgorithmCategory | null
+  onSelectGallery?: (category: AlgorithmCategory) => void
+  onSelectGalleryAlgorithm?: (id: AlgorithmId, category: AlgorithmCategory) => void
+  galleryInteractive?: boolean
   isTransitioning: boolean
   showEntranceLettering?: boolean
 }
@@ -379,6 +386,10 @@ function MuseumScene({
   setupNodeStates,
   onSelectNode,
   onSelectAlgorithms,
+  selectedGallery = null,
+  onSelectGallery,
+  onSelectGalleryAlgorithm,
+  galleryInteractive = false,
   isTransitioning,
   showEntranceLettering = true,
 }: MuseumSceneProps) {
@@ -930,6 +941,41 @@ function MuseumScene({
         selectionPrompt={selectionPrompt}
         setupNodeStates={setupNodeStates}
         onSelectNode={onSelectNode}
+      />
+      {ALGORITHM_SECTIONS.map((section) => {
+        const placement = ALGORITHM_GALLERY_PLACEMENTS[section.category]
+
+        return (
+          <AlgorithmGalleryPanel
+            key={section.category}
+            category={section.category}
+            entries={section.entries}
+            position={placement.position}
+            rotation={placement.rotation}
+            active={selectedGallery === section.category}
+            disabled={!galleryInteractive}
+            onSelectGallery={onSelectGallery}
+            onSelectAlgorithm={
+              onSelectGalleryAlgorithm
+                ? (id) => onSelectGalleryAlgorithm(id, section.category)
+                : undefined
+            }
+          />
+        )
+      })}
+      <pointLight
+        position={[ALGORITHMS_CENTER_X - 5.15, 4.55, ALGORITHMS_CENTER_Z]}
+        intensity={3.1}
+        distance={8}
+        decay={2}
+        color={museum.lightWarm}
+      />
+      <pointLight
+        position={[ALGORITHMS_CENTER_X + 5.15, 4.55, ALGORITHMS_CENTER_Z]}
+        intensity={3.1}
+        distance={8}
+        decay={2}
+        color={museum.lightWarm}
       />
 
       {COLUMNS.map((position) => (

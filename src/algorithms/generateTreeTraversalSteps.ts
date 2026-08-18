@@ -66,7 +66,7 @@ function generateBinaryTreeTraversalSteps(
     auxiliaryValues: string[] = orderLabels(order, nodesById),
   ) => {
     const auxiliaryData: AlgorithmAuxiliaryData = {
-      label: 'Order',
+      label: 'Traversal order',
       values: auxiliaryValues,
       emphasis: 'last',
     }

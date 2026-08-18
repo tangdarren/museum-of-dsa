@@ -108,7 +108,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
   },
   {
     id: 'bst-search',
-    title: 'BST Search',
+    title: 'Binary Search Tree Search',
     category: 'Trees',
     shortDescription: 'Finds a value by comparing it with each node and going left or right.',
     explore: ['Value comparisons', 'Left and right links', 'Found or missing values'],
@@ -154,4 +154,13 @@ export const ALGORITHM_SECTIONS: {
 
 export function getAlgorithmById(id: AlgorithmId): AlgorithmDefinition {
   return ALGORITHMS.find((entry) => entry.id === id) ?? ALGORITHMS[0]
+}
+
+export function getGalleryEntries(
+  category: AlgorithmCategory,
+): AlgorithmCatalogEntry[] {
+  return (
+    ALGORITHM_SECTIONS.find((section) => section.category === category)?.entries ??
+    []
+  )
 }
