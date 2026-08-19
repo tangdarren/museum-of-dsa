@@ -3,6 +3,7 @@ import type {
   AlgorithmInspection,
   AlgorithmLinkedListSnapshot,
   AlgorithmMetricTable,
+  AlgorithmPathResult,
   AlgorithmStep,
 } from '../types/algorithmStep'
 import {
@@ -17,6 +18,7 @@ type LinkedListStepInput = {
   auxiliaryData?: AlgorithmAuxiliaryData
   inspection?: AlgorithmInspection
   metrics?: AlgorithmMetricTable
+  pathResult?: AlgorithmPathResult
 }
 
 export function createLinkedListStep(input: LinkedListStepInput): AlgorithmStep {
@@ -48,6 +50,14 @@ export function createLinkedListStep(input: LinkedListStepInput): AlgorithmStep 
       ? {
           title: input.inspection.title,
           lines: [...input.inspection.lines],
+        }
+      : undefined,
+    pathResult: input.pathResult
+      ? {
+          found: input.pathResult.found,
+          nodes: [...input.pathResult.nodes],
+          cost: input.pathResult.cost,
+          exploredCount: input.pathResult.exploredCount,
         }
       : undefined,
   }

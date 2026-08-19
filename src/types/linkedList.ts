@@ -41,10 +41,23 @@ export type LinkedListOperationPhase =
   | 'relink'
   | 'complete'
 
+export type LinkedListTraversalDirection = 'forward' | 'backward'
+
 export type LinkedListOperationId =
+  | 'singly-linked-list-traverse'
   | 'singly-linked-list-search'
   | 'singly-linked-list-insert'
   | 'singly-linked-list-delete'
+  | 'doubly-linked-list-traverse-forward'
+  | 'doubly-linked-list-traverse-backward'
+  | 'doubly-linked-list-search'
+  | 'doubly-linked-list-insert'
+  | 'doubly-linked-list-delete'
+
+export type LinkedListMutationPosition =
+  | { at: 'head' }
+  | { at: 'tail' }
+  | { at: 'index'; index: number }
 
 export type LinkedListMetrics = {
   comparisons: number
