@@ -159,3 +159,51 @@ export const graphEdgeStyle = {
     radius: 0.012,
   },
 } as const
+
+export const linkedListNodeStyle = {
+  default: graphNodeStyle.default,
+  active: graphNodeStyle.active,
+  visited: graphNodeStyle.visited,
+  found: graphNodeStyle.start,
+  target: graphNodeStyle.target,
+  highlighted: graphNodeStyle.frontier,
+  inserting: {
+    color: '#3f7a52',
+    emissive: '#2d5c3e',
+    emissiveIntensity: 0.32,
+    roughness: 0.24,
+    metalness: 0.42,
+    scale: 1.14,
+    ring: '#8fbf8a',
+  },
+  deleting: {
+    color: '#c45c42',
+    emissive: '#a44832',
+    emissiveIntensity: 0.34,
+    roughness: 0.26,
+    metalness: 0.4,
+    scale: 0.88,
+  },
+} as const
+
+export const linkedListLinkStyle = {
+  next: {
+    color: '#8a8070',
+    emissive: '#3a342c',
+    emissiveIntensity: 0.05,
+    radius: 0.007,
+  },
+  previous: {
+    color: '#5c8f8a',
+    emissive: '#24383a',
+    emissiveIntensity: 0.08,
+    radius: 0.007,
+  },
+  active: graphEdgeStyle.active,
+  changing: {
+    color: '#e0b04a',
+    emissive: '#d4a040',
+    emissiveIntensity: 0.34,
+    radius: 0.011,
+  },
+} as const

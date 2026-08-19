@@ -21,10 +21,17 @@ export type LinkedListNodeState =
   | 'visited'
   | 'found'
   | 'target'
+  | 'highlighted'
   | 'inserting'
   | 'deleting'
 
 export type LinkedListNodeStates = Partial<Record<string, LinkedListNodeState>>
+
+export type LinkedListLinkKind = 'next' | 'previous'
+
+export type LinkedListLinkState = 'default' | 'active' | 'changing'
+
+export type LinkedListLinkStates = Partial<Record<string, LinkedListLinkState>>
 
 export type LinkedListPointer = 'head' | 'tail' | 'current' | 'previous' | 'next'
 
