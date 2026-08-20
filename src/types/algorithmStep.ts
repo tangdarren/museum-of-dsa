@@ -1,5 +1,13 @@
 import type { GraphEdgeStates, GraphNodeStates } from './graph'
 import type {
+  HashComputation,
+  HashTableBucket,
+  HashTableEntry,
+  HashTableMetrics,
+  HashTableOperationPhase,
+  HashTableOperationStatus,
+} from './hashTable'
+import type {
   LinkedListVariant,
   LinkedListMetrics,
   LinkedListNode,
@@ -105,6 +113,29 @@ export type AlgorithmLinkedListSnapshot = {
   searchResult?: 'found' | 'not-found'
 }
 
+export type AlgorithmHashTableSnapshot = {
+  bucketCount: number
+  buckets: HashTableBucket[]
+  entries: HashTableEntry[]
+  metrics: HashTableMetrics
+  hashComputation?: HashComputation
+  hashedKey?: string
+  hashValue?: number
+  activeBucketIndex?: number
+  activeEntryId?: string
+  targetKey?: string
+  targetValue?: string
+  highlightedEntryIds?: string[]
+  visitedEntryIds?: string[]
+  comparedEntryIds?: string[]
+  foundEntryId?: string
+  insertingEntryId?: string
+  deletingEntryId?: string
+  operationStatus?: HashTableOperationStatus
+  phase?: HashTableOperationPhase
+  searchResult?: 'found' | 'not-found'
+}
+
 export type AlgorithmStep = {
   id: string
   description: string
@@ -112,6 +143,7 @@ export type AlgorithmStep = {
   sortingSnapshot?: AlgorithmSortingSnapshot
   treeSnapshot?: AlgorithmTreeSnapshot
   linkedListSnapshot?: AlgorithmLinkedListSnapshot
+  hashTableSnapshot?: AlgorithmHashTableSnapshot
   nodeStates?: GraphNodeStates
   edgeStates?: GraphEdgeStates
   auxiliaryData?: AlgorithmAuxiliaryData
