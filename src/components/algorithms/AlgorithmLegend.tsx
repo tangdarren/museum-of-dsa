@@ -1,8 +1,17 @@
-import { graphEdgeStyle, graphNodeStyle, sortingBarStyle } from '../../theme/palette'
+import {
+  graphEdgeStyle,
+  graphNodeStyle,
+  linkedListNodeStyle,
+  sortingBarStyle,
+} from '../../theme/palette'
 import {
   isGraphAlgorithm,
+  isLinkedListAlgorithm,
   isSortingAlgorithm,
   isTreeAlgorithm,
+  usesLinkedListDelete,
+  usesLinkedListInsert,
+  usesLinkedListSearch,
 } from '../../algorithms/getAlgorithmSteps'
 import type { AlgorithmId } from '../../types/algorithm'
 
@@ -78,11 +87,68 @@ const BST_SEARCH_LEGEND_ITEMS = [
   { key: 'found', label: 'Found', color: graphNodeStyle.start.color },
 ] as const
 
+const LINKED_LIST_TRAVERSE_LEGEND_ITEMS = [
+  { key: 'active', label: 'Current', color: linkedListNodeStyle.active.color },
+  { key: 'visited', label: 'Visited', color: linkedListNodeStyle.visited.color },
+] as const
+
+const LINKED_LIST_SEARCH_LEGEND_ITEMS = [
+  { key: 'target', label: 'Target', color: linkedListNodeStyle.target.color },
+  { key: 'active', label: 'Current', color: linkedListNodeStyle.active.color },
+  { key: 'visited', label: 'Visited', color: linkedListNodeStyle.visited.color },
+  { key: 'found', label: 'Found', color: linkedListNodeStyle.found.color },
+] as const
+
+const LINKED_LIST_INSERT_LEGEND_ITEMS = [
+  { key: 'active', label: 'Current', color: linkedListNodeStyle.active.color },
+  {
+    key: 'inserting',
+    label: 'Inserting',
+    color: linkedListNodeStyle.inserting.color,
+  },
+  { key: 'visited', label: 'Visited', color: linkedListNodeStyle.visited.color },
+] as const
+
+const LINKED_LIST_DELETE_LEGEND_ITEMS = [
+  { key: 'active', label: 'Current', color: linkedListNodeStyle.active.color },
+  {
+    key: 'deleting',
+    label: 'Deleting',
+    color: linkedListNodeStyle.deleting.color,
+  },
+  { key: 'visited', label: 'Visited', color: linkedListNodeStyle.visited.color },
+] as const
+
 type AlgorithmLegendProps = {
   algorithmId: AlgorithmId
 }
 
 function AlgorithmLegend({ algorithmId }: AlgorithmLegendProps) {
+  if (isLinkedListAlgorithm(algorithmId)) {
+    const items = usesLinkedListSearch(algorithmId)
+      ? LINKED_LIST_SEARCH_LEGEND_ITEMS
+      : usesLinkedListInsert(algorithmId)
+        ? LINKED_LIST_INSERT_LEGEND_ITEMS
+        : usesLinkedListDelete(algorithmId)
+          ? LINKED_LIST_DELETE_LEGEND_ITEMS
+          : LINKED_LIST_TRAVERSE_LEGEND_ITEMS
+
+    return (
+      <ul className="algorithm-legend" aria-label="Linked list state legend">
+        {items.map((item) => (
+          <li key={item.key}>
+            <span
+              className="algorithm-legend-swatch"
+              style={{ backgroundColor: item.color }}
+              aria-hidden="true"
+            />
+            <span>{item.label}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   if (isTreeAlgorithm(algorithmId)) {
     const items =
       algorithmId === 'bst-search' ? BST_SEARCH_LEGEND_ITEMS : TREE_LEGEND_ITEMS

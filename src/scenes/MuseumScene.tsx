@@ -9,19 +9,21 @@ import type {
 } from 'three'
 import AlgorithmGalleryPanel from '../components/museum/AlgorithmGalleryPanel'
 import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
+import ExhibitHall from '../components/museum/ExhibitHall'
 import MuseumSign from '../components/museum/MuseumSign'
-import { ALGORITHM_SECTIONS } from '../data/algorithms'
+import { ALGORITHM_SECTIONS, DATA_STRUCTURE_SECTIONS } from '../data/algorithms'
+import { createSampleLinkedListSnapshot, SAMPLE_DOUBLY_LINKED_LIST, SAMPLE_LINKED_LIST } from '../data/sampleLinkedList'
 import { museum } from '../theme/palette'
 import type { AlgorithmCategory, AlgorithmDefinition, AlgorithmId } from '../types/algorithm'
+import { isAlgorithmRoomCategory, isLinkedListCategory } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphNodeStates } from '../types/graph'
 import {
   ALGORITHM_GALLERY_PLACEMENTS,
-  ALGORITHMS_BACK,
   ALGORITHMS_CENTER_X,
-  ALGORITHMS_CENTER_Z,
-  ALGORITHMS_ROOM_DEPTH,
-  ALGORITHMS_ROOM_WIDTH,
+  DATA_STRUCTURE_GALLERY_PLACEMENTS,
+  DATA_STRUCTURE_INSTALLATION_POSITION,
+  DATA_STRUCTURES_CENTER_X,
   ENTRANCE_PORTAL,
   FRONT_BACK,
   LOBBY_BACK,
@@ -35,6 +37,12 @@ import {
   WALL_THICKNESS,
   type MuseumLocation,
 } from '../navigation/destinations'
+
+const IDLE_SINGLY_LINKED_LIST_SNAPSHOT =
+  createSampleLinkedListSnapshot(SAMPLE_LINKED_LIST)
+const IDLE_DOUBLY_LINKED_LIST_SNAPSHOT = createSampleLinkedListSnapshot(
+  SAMPLE_DOUBLY_LINKED_LIST,
+)
 
 const COLUMNS: [number, number, number][] = [
   [-7.2, ROOM_HEIGHT / 2, -8.5],
@@ -369,6 +377,7 @@ type MuseumSceneProps = {
   setupNodeStates?: GraphNodeStates
   onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
+  onSelectDataStructures?: () => void
   selectedGallery?: AlgorithmCategory | null
   onSelectGallery?: (category: AlgorithmCategory) => void
   onSelectGalleryAlgorithm?: (id: AlgorithmId, category: AlgorithmCategory) => void
@@ -386,6 +395,7 @@ function MuseumScene({
   setupNodeStates,
   onSelectNode,
   onSelectAlgorithms,
+  onSelectDataStructures,
   selectedGallery = null,
   onSelectGallery,
   onSelectGalleryAlgorithm,
@@ -394,11 +404,32 @@ function MuseumScene({
   showEntranceLettering = true,
 }: MuseumSceneProps) {
   const showLobbyDestinations = location !== 'entrance'
+  const algorithmsGalleryInteractive =
+    galleryInteractive && location === 'algorithms'
+  const dataStructureGalleryInteractive =
+    galleryInteractive && location === 'data-structures'
+  const algorithmsAlgorithm =
+    selectedAlgorithm && isAlgorithmRoomCategory(selectedAlgorithm.category)
+      ? selectedAlgorithm
+      : null
+  const algorithmsPreview =
+    previewAlgorithm && isAlgorithmRoomCategory(previewAlgorithm.category)
+      ? previewAlgorithm
+      : null
+  const dataStructureAlgorithm =
+    selectedAlgorithm && isLinkedListCategory(selectedAlgorithm.category)
+      ? selectedAlgorithm
+      : null
+  const dataStructurePreview =
+    previewAlgorithm && isLinkedListCategory(previewAlgorithm.category)
+      ? previewAlgorithm
+      : null
   const inspection = selectedAlgorithm !== null
   const ambientRef = useRef<AmbientLight>(null)
   const hemisphereRef = useRef<HemisphereLight>(null)
   const directionalRef = useRef<DirectionalLight>(null)
   const algorithmsFillRef = useRef<SpotLight>(null)
+  const dataStructuresFillRef = useRef<SpotLight>(null)
   const lightBlend = useRef(0)
   const reducedMotion = useRef(
     window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -426,6 +457,10 @@ function MuseumScene({
 
     if (algorithmsFillRef.current) {
       algorithmsFillRef.current.intensity = 10 - t * 4.5
+    }
+
+    if (dataStructuresFillRef.current) {
+      dataStructuresFillRef.current.intensity = 10 - t * 4.5
     }
   })
 
@@ -683,8 +718,12 @@ function MuseumScene({
           <DestinationDoor
             position={[-LOBBY_DOOR_OFFSET, 0, LOBBY_BACK + 0.16]}
             label="DATA STRUCTURES"
-            subtitle="Coming Soon"
-            open={false}
+            subtitle="Enter"
+            open
+            onSelect={
+              location === 'lobby' ? onSelectDataStructures : undefined
+            }
+            disabled={isTransitioning}
           />
           <DestinationDoor
             position={[LOBBY_DOOR_OFFSET, 0, LOBBY_BACK + 0.16]}
@@ -703,6 +742,7 @@ function MuseumScene({
             position={[-LOBBY_DOOR_OFFSET, LOBBY_DOOR.y, LOBBY_BACK + 0.16]}
             width={LOBBY_DOOR.width}
             height={LOBBY_DOOR.height}
+            open
           />
           <Portal
             position={[LOBBY_DOOR_OFFSET, LOBBY_DOOR.y, LOBBY_BACK + 0.16]}
@@ -713,234 +753,22 @@ function MuseumScene({
         </>
       )}
 
-      <mesh
-        position={[ALGORITHMS_CENTER_X, -WALL_THICKNESS / 2, ALGORITHMS_CENTER_Z]}
-        receiveShadow
-      >
-        <boxGeometry
-          args={[ALGORITHMS_ROOM_WIDTH, WALL_THICKNESS, ALGORITHMS_ROOM_DEPTH]}
-        />
-        <meshStandardMaterial
-          color={museum.stone}
-          roughness={0.9}
-          metalness={0.03}
-        />
-      </mesh>
-      <mesh
-        position={[ALGORITHMS_CENTER_X, 0.025, ALGORITHMS_CENTER_Z - 0.4]}
-        receiveShadow
-      >
-        <boxGeometry args={[11.2, 0.05, 10.4]} />
-        <meshStandardMaterial
-          color={museum.stoneDeep}
-          roughness={0.86}
-          metalness={0.05}
-        />
-      </mesh>
-      <mesh position={[ALGORITHMS_CENTER_X, 0.04, ALGORITHMS_CENTER_Z + 4.8]}>
-        <boxGeometry args={[11.35, 0.02, 0.06]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.4}
-          metalness={0.5}
-        />
-      </mesh>
-      <mesh position={[ALGORITHMS_CENTER_X, 0.04, ALGORITHMS_CENTER_Z - 5.6]}>
-        <boxGeometry args={[11.35, 0.02, 0.06]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.4}
-          metalness={0.5}
-        />
-      </mesh>
-      <mesh
-        position={[ALGORITHMS_CENTER_X - 5.6, 0.04, ALGORITHMS_CENTER_Z - 0.4]}
-      >
-        <boxGeometry args={[0.06, 0.02, 10.55]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.4}
-          metalness={0.5}
-        />
-      </mesh>
-      <mesh
-        position={[ALGORITHMS_CENTER_X + 5.6, 0.04, ALGORITHMS_CENTER_Z - 0.4]}
-      >
-        <boxGeometry args={[0.06, 0.02, 10.55]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.4}
-          metalness={0.5}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.04,
-          0.7,
-          ALGORITHMS_CENTER_Z,
-        ]}
-        receiveShadow
-      >
-        <boxGeometry args={[0.08, 1.4, ALGORITHMS_ROOM_DEPTH - 0.3]} />
-        <meshStandardMaterial
-          color={museum.wainscot}
-          roughness={0.8}
-          metalness={0.04}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.04,
-          0.7,
-          ALGORITHMS_CENTER_Z,
-        ]}
-        receiveShadow
-      >
-        <boxGeometry args={[0.08, 1.4, ALGORITHMS_ROOM_DEPTH - 0.3]} />
-        <meshStandardMaterial
-          color={museum.wainscot}
-          roughness={0.8}
-          metalness={0.04}
-        />
-      </mesh>
-      <mesh
-        position={[ALGORITHMS_CENTER_X, 0.7, ALGORITHMS_BACK + 0.04]}
-        receiveShadow
-      >
-        <boxGeometry args={[ALGORITHMS_ROOM_WIDTH - 0.2, 1.4, 0.08]} />
-        <meshStandardMaterial
-          color={museum.wainscot}
-          roughness={0.8}
-          metalness={0.04}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.05,
-          0.06,
-          ALGORITHMS_CENTER_Z,
-        ]}
-      >
-        <boxGeometry args={[0.06, 0.12, ALGORITHMS_ROOM_DEPTH - 0.2]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.38}
-          metalness={0.52}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.05,
-          0.06,
-          ALGORITHMS_CENTER_Z,
-        ]}
-      >
-        <boxGeometry args={[0.06, 0.12, ALGORITHMS_ROOM_DEPTH - 0.2]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.38}
-          metalness={0.52}
-        />
-      </mesh>
-      <mesh position={[ALGORITHMS_CENTER_X, 0.06, ALGORITHMS_BACK + 0.05]}>
-        <boxGeometry args={[ALGORITHMS_ROOM_WIDTH - 0.16, 0.12, 0.06]} />
-        <meshStandardMaterial
-          color={museum.bronze}
-          roughness={0.38}
-          metalness={0.52}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 - WALL_THICKNESS / 2,
-          ROOM_HEIGHT / 2,
-          ALGORITHMS_CENTER_Z,
-        ]}
-        receiveShadow
-      >
-        <boxGeometry
-          args={[WALL_THICKNESS, ROOM_HEIGHT, ALGORITHMS_ROOM_DEPTH]}
-        />
-        <meshStandardMaterial
-          color={museum.wall}
-          roughness={0.82}
-          metalness={0.02}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 + WALL_THICKNESS / 2,
-          ROOM_HEIGHT / 2,
-          ALGORITHMS_CENTER_Z,
-        ]}
-        receiveShadow
-      >
-        <boxGeometry
-          args={[WALL_THICKNESS, ROOM_HEIGHT, ALGORITHMS_ROOM_DEPTH]}
-        />
-        <meshStandardMaterial
-          color={museum.wall}
-          roughness={0.82}
-          metalness={0.02}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X,
-          ROOM_HEIGHT / 2,
-          ALGORITHMS_BACK - WALL_THICKNESS / 2,
-        ]}
-        receiveShadow
-      >
-        <boxGeometry
-          args={[ALGORITHMS_ROOM_WIDTH + WALL_THICKNESS * 2, ROOM_HEIGHT, WALL_THICKNESS]}
-        />
-        <meshStandardMaterial
-          color={museum.wall}
-          roughness={0.82}
-          metalness={0.02}
-        />
-      </mesh>
-      <mesh
-        position={[
-          ALGORITHMS_CENTER_X,
-          ROOM_HEIGHT + WALL_THICKNESS / 2,
-          ALGORITHMS_CENTER_Z,
-        ]}
-      >
-        <boxGeometry
-          args={[
-            ALGORITHMS_ROOM_WIDTH + WALL_THICKNESS * 2,
-            WALL_THICKNESS,
-            ALGORITHMS_ROOM_DEPTH,
-          ]}
-        />
-        <meshStandardMaterial
-          color={museum.ceiling}
-          roughness={0.86}
-          metalness={0.02}
-        />
-      </mesh>
-      <spotLight
-        ref={algorithmsFillRef}
-        position={[ALGORITHMS_CENTER_X, 8.2, ALGORITHMS_CENTER_Z]}
-        angle={0.48}
-        penumbra={0.7}
-        intensity={10}
-        distance={14}
-        color={museum.lightWarm}
+      <ExhibitHall
+        centerX={DATA_STRUCTURES_CENTER_X}
+        fillLightRef={dataStructuresFillRef}
       />
-      <CeilingLight
-        position={[ALGORITHMS_CENTER_X, ROOM_HEIGHT - 0.12, ALGORITHMS_CENTER_Z]}
+      <ExhibitHall
+        centerX={ALGORITHMS_CENTER_X}
+        fillLightRef={algorithmsFillRef}
       />
 
       <AlgorithmInstallation
-        algorithm={selectedAlgorithm}
-        preview={previewAlgorithm}
-        playbackStep={playbackStep}
-        selectionPrompt={selectionPrompt}
-        setupNodeStates={setupNodeStates}
-        onSelectNode={onSelectNode}
+        algorithm={location === 'algorithms' ? algorithmsAlgorithm : null}
+        preview={location === 'algorithms' ? algorithmsPreview : null}
+        playbackStep={location === 'algorithms' ? playbackStep : null}
+        selectionPrompt={location === 'algorithms' ? selectionPrompt : null}
+        setupNodeStates={location === 'algorithms' ? setupNodeStates : undefined}
+        onSelectNode={location === 'algorithms' ? onSelectNode : undefined}
       />
       {ALGORITHM_SECTIONS.map((section) => {
         const placement = ALGORITHM_GALLERY_PLACEMENTS[section.category]
@@ -953,7 +781,7 @@ function MuseumScene({
             position={placement.position}
             rotation={placement.rotation}
             active={selectedGallery === section.category}
-            disabled={!galleryInteractive}
+            disabled={!algorithmsGalleryInteractive}
             onSelectGallery={onSelectGallery}
             onSelectAlgorithm={
               onSelectGalleryAlgorithm
@@ -963,20 +791,42 @@ function MuseumScene({
           />
         )
       })}
-      <pointLight
-        position={[ALGORITHMS_CENTER_X - 5.15, 4.55, ALGORITHMS_CENTER_Z]}
-        intensity={3.1}
-        distance={8}
-        decay={2}
-        color={museum.lightWarm}
+
+      <AlgorithmInstallation
+        position={DATA_STRUCTURE_INSTALLATION_POSITION}
+        plateLabel="LINKED LISTS"
+        emptyTitle="LINKED LISTS"
+        emptySubtitle="Data Structures"
+        idleLinkedListSnapshot={
+          selectedGallery === 'Doubly Linked List'
+            ? IDLE_DOUBLY_LINKED_LIST_SNAPSHOT
+            : IDLE_SINGLY_LINKED_LIST_SNAPSHOT
+        }
+        algorithm={location === 'data-structures' ? dataStructureAlgorithm : null}
+        preview={location === 'data-structures' ? dataStructurePreview : null}
+        playbackStep={location === 'data-structures' ? playbackStep : null}
       />
-      <pointLight
-        position={[ALGORITHMS_CENTER_X + 5.15, 4.55, ALGORITHMS_CENTER_Z]}
-        intensity={3.1}
-        distance={8}
-        decay={2}
-        color={museum.lightWarm}
-      />
+      {DATA_STRUCTURE_SECTIONS.map((section) => {
+        const placement = DATA_STRUCTURE_GALLERY_PLACEMENTS[section.category]
+
+        return (
+          <AlgorithmGalleryPanel
+            key={section.category}
+            category={section.category}
+            entries={section.entries}
+            position={placement.position}
+            rotation={placement.rotation}
+            active={selectedGallery === section.category}
+            disabled={!dataStructureGalleryInteractive}
+            onSelectGallery={onSelectGallery}
+            onSelectAlgorithm={
+              onSelectGalleryAlgorithm
+                ? (id) => onSelectGalleryAlgorithm(id, section.category)
+                : undefined
+            }
+          />
+        )
+      })}
 
       {COLUMNS.map((position) => (
         <Column key={position.join(',')} position={position} />

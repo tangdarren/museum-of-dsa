@@ -4,17 +4,22 @@ import { useRef } from 'react'
 import type { MeshStandardMaterial, SpotLight } from 'three'
 import { mapAlgorithmStepToGraph } from '../algorithms/mapAlgorithmStepToGraph'
 import {
+  isLinkedListCategory,
   isSortingCategory,
   isTreesCategory,
 } from '../../algorithms/getAlgorithmSteps'
 import { ALGORITHM_PREVIEWS } from '../../data/algorithmPreviews'
-import { ALGORITHM_INSTALLATION_POSITION } from '../../navigation/destinations'
 import { SAMPLE_GRAPH } from '../../data/sampleGraph'
+import { ALGORITHM_INSTALLATION_POSITION, type Vec3 } from '../../navigation/destinations'
 import { museum } from '../../theme/palette'
 import type { AlgorithmDefinition } from '../../types/algorithm'
-import type { AlgorithmStep } from '../../types/algorithmStep'
+import type {
+  AlgorithmLinkedListSnapshot,
+  AlgorithmStep,
+} from '../../types/algorithmStep'
 import type { GraphNodeStates } from '../../types/graph'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
+import LinkedListVisualization from '../visualizations/linkedList/LinkedListVisualization'
 import SortVisualization from '../visualizations/sorting/SortVisualization'
 import TreeVisualization from '../visualizations/tree/TreeVisualization'
 import AmbientComputationField from './AmbientComputationField'
@@ -26,6 +31,11 @@ type AlgorithmInstallationProps = {
   selectionPrompt?: 'start' | 'target' | null
   setupNodeStates?: GraphNodeStates
   onSelectNode?: (nodeId: string) => void
+  position?: Vec3
+  plateLabel?: string
+  emptyTitle?: string
+  emptySubtitle?: string
+  idleLinkedListSnapshot?: AlgorithmLinkedListSnapshot | null
 }
 
 function prefersReducedMotion() {
@@ -39,6 +49,11 @@ function AlgorithmInstallation({
   selectionPrompt = null,
   setupNodeStates,
   onSelectNode,
+  position = ALGORITHM_INSTALLATION_POSITION,
+  plateLabel = 'ALGORITHMS',
+  emptyTitle = 'ALGORITHMS',
+  emptySubtitle = 'Explore how computers solve problems step by step.',
+  idleLinkedListSnapshot = null,
 }: AlgorithmInstallationProps) {
   const displayed = algorithm ?? preview
   const inspection = algorithm !== null
@@ -46,6 +61,9 @@ function AlgorithmInstallation({
   const previewConfig = preview && !algorithm ? ALGORITHM_PREVIEWS[preview.id] : null
   const showingSorting = displayed ? isSortingCategory(displayed.category) : false
   const showingTree = displayed ? isTreesCategory(displayed.category) : false
+  const showingLinkedList = displayed
+    ? isLinkedListCategory(displayed.category)
+    : Boolean(idleLinkedListSnapshot)
   const playbackGraph = mapAlgorithmStepToGraph(playbackStep)
   const graphPreview =
     previewConfig?.visualization === 'graph' ? previewConfig : null
@@ -62,6 +80,13 @@ function AlgorithmInstallation({
       : previewConfig?.visualization === 'tree'
         ? previewConfig.snapshot
         : null
+    : null
+  const linkedListSnapshot = showingLinkedList
+    ? algorithm
+      ? (playbackStep?.linkedListSnapshot ?? null)
+      : previewConfig?.visualization === 'linked-list'
+        ? previewConfig.snapshot
+        : (idleLinkedListSnapshot ?? null)
     : null
   const graphStates = algorithm
     ? playbackStep
@@ -112,7 +137,7 @@ function AlgorithmInstallation({
   })
 
   return (
-    <group position={ALGORITHM_INSTALLATION_POSITION}>
+    <group position={position}>
       <mesh position={[0, 0.16, 0.06]} receiveShadow>
         <boxGeometry args={[12.8, 0.32, 1.7]} />
         <meshStandardMaterial
@@ -307,14 +332,14 @@ function AlgorithmInstallation({
         anchorY="middle"
         letterSpacing={0.16}
       >
-        ALGORITHMS
+        {plateLabel}
       </Text>
 
       <group position={[0, 3.2, 0.22]} scale={[4.6, 2.5, 1]}>
-        <AmbientComputationField visible={!displayed} />
+        <AmbientComputationField visible={!displayed && !idleLinkedListSnapshot} />
       </group>
 
-      {displayed ? (
+      {displayed || idleLinkedListSnapshot ? (
         <group>
           <Text
             position={[0, 5.12, 0.22]}
@@ -326,7 +351,7 @@ function AlgorithmInstallation({
             maxWidth={9.6}
             textAlign="center"
           >
-            {displayed.title.toUpperCase()}
+            {displayed ? displayed.title.toUpperCase() : emptyTitle}
           </Text>
           <Text
             position={[0, 4.82, 0.22]}
@@ -336,7 +361,7 @@ function AlgorithmInstallation({
             anchorY="middle"
             letterSpacing={0.14}
           >
-            {displayed.category}
+            {displayed?.category ?? emptySubtitle}
           </Text>
           <mesh position={[0, 4.66, 0.21]}>
             <boxGeometry args={[1.35, 0.012, 0.008]} />
@@ -389,6 +414,10 @@ function AlgorithmInstallation({
             <group position={[0, 2.9, 0.36]} scale={2.62}>
               <TreeVisualization snapshot={treeSnapshot} />
             </group>
+          ) : showingLinkedList ? (
+            <group position={[0, 2.88, 0.36]} scale={4.15}>
+              <LinkedListVisualization snapshot={linkedListSnapshot} />
+            </group>
           ) : (
             <group
               position={[0, 3.02, 0.23]}
@@ -415,7 +444,7 @@ function AlgorithmInstallation({
             anchorY="middle"
             letterSpacing={0.16}
           >
-            ALGORITHMS
+            {emptyTitle}
           </Text>
           <mesh position={[0, 3.38, 0.21]}>
             <boxGeometry args={[1.6, 0.014, 0.008]} />
@@ -437,7 +466,7 @@ function AlgorithmInstallation({
             textAlign="center"
             lineHeight={1.35}
           >
-            Explore how computers solve problems step by step.
+            {emptySubtitle}
           </Text>
         </group>
       )}

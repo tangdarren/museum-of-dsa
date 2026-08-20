@@ -1,6 +1,11 @@
 import type { AlgorithmCategory, AlgorithmId } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphData } from '../types/graph'
+import type {
+  LinkedListData,
+  LinkedListMutationPosition,
+  LinkedListVariant,
+} from '../types/linkedList'
 import type { TreeData } from '../types/tree'
 import { generateAStarSteps } from './generateAStarSteps'
 import { generateBfsSteps } from './generateBfsSteps'
@@ -8,9 +13,20 @@ import { generateBstSearchSteps } from './generateBstSearchSteps'
 import { generateBubbleSortSteps } from './generateBubbleSortSteps'
 import { generateDfsSteps } from './generateDfsSteps'
 import { generateDijkstraSteps } from './generateDijkstraSteps'
+import { generateDoublyLinkedListDeleteSteps } from './generateDoublyLinkedListDeleteSteps'
+import { generateDoublyLinkedListInsertSteps } from './generateDoublyLinkedListInsertSteps'
+import { generateDoublyLinkedListSearchSteps } from './generateDoublyLinkedListSearchSteps'
+import {
+  generateDoublyLinkedListBackwardTraverseSteps,
+  generateDoublyLinkedListForwardTraverseSteps,
+} from './generateDoublyLinkedListTraverseSteps'
 import { generateInsertionSortSteps } from './generateInsertionSortSteps'
 import { generateMergeSortSteps } from './generateMergeSortSteps'
 import { generateQuickSortSteps } from './generateQuickSortSteps'
+import { generateSinglyLinkedListDeleteSteps } from './generateSinglyLinkedListDeleteSteps'
+import { generateSinglyLinkedListInsertSteps } from './generateSinglyLinkedListInsertSteps'
+import { generateSinglyLinkedListSearchSteps } from './generateSinglyLinkedListSearchSteps'
+import { generateSinglyLinkedListTraverseSteps } from './generateSinglyLinkedListTraverseSteps'
 import {
   generateInorderTraversalSteps,
   generatePostorderTraversalSteps,
@@ -38,6 +54,28 @@ export const TREE_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
   'bst-search',
 ])
 
+export const SINGLY_LINKED_LIST_ALGORITHM_IDS: ReadonlySet<AlgorithmId> =
+  new Set([
+    'singly-linked-list-traverse',
+    'singly-linked-list-search',
+    'singly-linked-list-insert',
+    'singly-linked-list-delete',
+  ])
+
+export const DOUBLY_LINKED_LIST_ALGORITHM_IDS: ReadonlySet<AlgorithmId> =
+  new Set([
+    'doubly-linked-list-traverse-forward',
+    'doubly-linked-list-traverse-backward',
+    'doubly-linked-list-search',
+    'doubly-linked-list-insert',
+    'doubly-linked-list-delete',
+  ])
+
+export const LINKED_LIST_ALGORITHM_IDS: ReadonlySet<AlgorithmId> = new Set([
+  ...SINGLY_LINKED_LIST_ALGORITHM_IDS,
+  ...DOUBLY_LINKED_LIST_ALGORITHM_IDS,
+])
+
 export type AlgorithmRunInput = {
   graph: GraphData
   startNodeId: string | null
@@ -45,6 +83,10 @@ export type AlgorithmRunInput = {
   values: readonly number[]
   tree: TreeData
   targetValue?: number | null
+  list: LinkedListData
+  insertValue?: number | null
+  insertPosition?: LinkedListMutationPosition
+  deletePosition?: LinkedListMutationPosition
 }
 
 export function isSortingAlgorithm(
@@ -69,6 +111,10 @@ export function isTreeAlgorithm(
   return TREE_ALGORITHM_IDS.has(algorithmId)
 }
 
+export function isLinkedListAlgorithm(algorithmId: AlgorithmId): boolean {
+  return LINKED_LIST_ALGORITHM_IDS.has(algorithmId)
+}
+
 export function isSortingCategory(category: AlgorithmCategory): boolean {
   return category === 'Sorting'
 }
@@ -87,6 +133,41 @@ export function usesTargetNodeSelection(algorithmId: AlgorithmId): boolean {
 
 export function usesTreeTargetSelection(algorithmId: AlgorithmId): boolean {
   return algorithmId === 'bst-search'
+}
+
+export function usesLinkedListSearch(algorithmId: AlgorithmId): boolean {
+  return (
+    algorithmId === 'singly-linked-list-search' ||
+    algorithmId === 'doubly-linked-list-search'
+  )
+}
+
+export function usesLinkedListInsert(algorithmId: AlgorithmId): boolean {
+  return (
+    algorithmId === 'singly-linked-list-insert' ||
+    algorithmId === 'doubly-linked-list-insert'
+  )
+}
+
+export function usesLinkedListDelete(algorithmId: AlgorithmId): boolean {
+  return (
+    algorithmId === 'singly-linked-list-delete' ||
+    algorithmId === 'doubly-linked-list-delete'
+  )
+}
+
+export function getLinkedListVariantForAlgorithm(
+  algorithmId: AlgorithmId,
+): LinkedListVariant | null {
+  if (SINGLY_LINKED_LIST_ALGORITHM_IDS.has(algorithmId)) {
+    return 'singly'
+  }
+
+  if (DOUBLY_LINKED_LIST_ALGORITHM_IDS.has(algorithmId)) {
+    return 'doubly'
+  }
+
+  return null
 }
 
 function getGraphAlgorithmSteps(
@@ -165,6 +246,61 @@ function getTreeAlgorithmSteps(
   return []
 }
 
+function getLinkedListAlgorithmSteps(
+  algorithmId: AlgorithmId,
+  list: LinkedListData,
+  targetValue: number | null,
+  insertValue: number | null,
+  insertPosition: LinkedListMutationPosition,
+  deletePosition: LinkedListMutationPosition,
+): AlgorithmStep[] {
+  if (algorithmId === 'singly-linked-list-traverse') {
+    return generateSinglyLinkedListTraverseSteps(list)
+  }
+
+  if (algorithmId === 'singly-linked-list-search') {
+    return targetValue === null
+      ? []
+      : generateSinglyLinkedListSearchSteps(list, targetValue)
+  }
+
+  if (algorithmId === 'singly-linked-list-insert') {
+    return insertValue === null
+      ? []
+      : generateSinglyLinkedListInsertSteps(list, insertValue, insertPosition)
+  }
+
+  if (algorithmId === 'singly-linked-list-delete') {
+    return generateSinglyLinkedListDeleteSteps(list, deletePosition)
+  }
+
+  if (algorithmId === 'doubly-linked-list-traverse-forward') {
+    return generateDoublyLinkedListForwardTraverseSteps(list)
+  }
+
+  if (algorithmId === 'doubly-linked-list-traverse-backward') {
+    return generateDoublyLinkedListBackwardTraverseSteps(list)
+  }
+
+  if (algorithmId === 'doubly-linked-list-search') {
+    return targetValue === null
+      ? []
+      : generateDoublyLinkedListSearchSteps(list, targetValue)
+  }
+
+  if (algorithmId === 'doubly-linked-list-insert') {
+    return insertValue === null
+      ? []
+      : generateDoublyLinkedListInsertSteps(list, insertValue, insertPosition)
+  }
+
+  if (algorithmId === 'doubly-linked-list-delete') {
+    return generateDoublyLinkedListDeleteSteps(list, deletePosition)
+  }
+
+  return []
+}
+
 export function getAlgorithmSteps(
   algorithmId: AlgorithmId,
   input: AlgorithmRunInput,
@@ -181,6 +317,17 @@ export function getAlgorithmSteps(
     )
   }
 
+  if (isLinkedListAlgorithm(algorithmId)) {
+    return getLinkedListAlgorithmSteps(
+      algorithmId,
+      input.list,
+      input.targetValue ?? null,
+      input.insertValue ?? null,
+      input.insertPosition ?? { at: 'head' },
+      input.deletePosition ?? { at: 'tail' },
+    )
+  }
+
   return getGraphAlgorithmSteps(
     algorithmId,
     input.graph,
@@ -188,3 +335,5 @@ export function getAlgorithmSteps(
     input.targetNodeId ?? null,
   )
 }
+
+export { isLinkedListCategory } from '../types/algorithm'

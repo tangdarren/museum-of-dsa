@@ -104,7 +104,8 @@ function AlgorithmGalleryPanel({
           color={museum.cream}
           anchorX="center"
           anchorY="middle"
-          letterSpacing={0.12}
+          maxWidth={PANEL_WIDTH - 0.28}
+          textAlign="center"
         >
           {category.toUpperCase()}
         </Text>

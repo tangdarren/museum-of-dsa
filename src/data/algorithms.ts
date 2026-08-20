@@ -3,8 +3,11 @@ import type {
   AlgorithmCategory,
   AlgorithmDefinition,
   AlgorithmId,
+  AlgorithmRoomCategory,
   FutureAlgorithmDefinition,
+  LinkedListCategory,
 } from '../types/algorithm'
+import { LINKED_LIST_OPERATIONS } from './linkedListOperations'
 
 export const ALGORITHMS: AlgorithmDefinition[] = [
   {
@@ -115,6 +118,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     complexity: { time: 'O(h)', space: 'O(1)' },
     available: true,
   },
+  ...LINKED_LIST_OPERATIONS,
 ]
 
 export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
@@ -128,7 +132,7 @@ export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
 ]
 
 export const ALGORITHM_SECTIONS: {
-  category: AlgorithmCategory
+  category: AlgorithmRoomCategory
   entries: AlgorithmCatalogEntry[]
 }[] = [
   {
@@ -152,6 +156,24 @@ export const ALGORITHM_SECTIONS: {
   },
 ]
 
+export const DATA_STRUCTURE_SECTIONS: {
+  category: LinkedListCategory
+  entries: AlgorithmCatalogEntry[]
+}[] = [
+  {
+    category: 'Singly Linked List',
+    entries: ALGORITHMS.filter(
+      (algorithm) => algorithm.category === 'Singly Linked List',
+    ),
+  },
+  {
+    category: 'Doubly Linked List',
+    entries: ALGORITHMS.filter(
+      (algorithm) => algorithm.category === 'Doubly Linked List',
+    ),
+  },
+]
+
 export function getAlgorithmById(id: AlgorithmId): AlgorithmDefinition {
   return ALGORITHMS.find((entry) => entry.id === id) ?? ALGORITHMS[0]
 }
@@ -160,7 +182,8 @@ export function getGalleryEntries(
   category: AlgorithmCategory,
 ): AlgorithmCatalogEntry[] {
   return (
-    ALGORITHM_SECTIONS.find((section) => section.category === category)?.entries ??
-    []
+    [...ALGORITHM_SECTIONS, ...DATA_STRUCTURE_SECTIONS].find(
+      (section) => section.category === category,
+    )?.entries ?? []
   )
 }

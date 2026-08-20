@@ -1,10 +1,16 @@
 import AlgorithmSelector from './AlgorithmSelector'
-import type { AlgorithmId } from '../../types/algorithm'
+import type {
+  AlgorithmCatalogSection,
+  AlgorithmId,
+} from '../../types/algorithm'
 
 type AlgorithmInstallationUiProps = {
   selectorOpen: boolean
   disabled: boolean
   previewId: AlgorithmId | null
+  sections?: AlgorithmCatalogSection[]
+  chooseLabel?: string
+  selectorTitle?: string
   onPreview: (id: AlgorithmId | null) => void
   onOpenSelector: () => void
   onCloseSelector: () => void
@@ -15,6 +21,9 @@ function AlgorithmInstallationUi({
   selectorOpen,
   disabled,
   previewId,
+  sections,
+  chooseLabel = 'Choose Algorithm',
+  selectorTitle,
   onPreview,
   onOpenSelector,
   onCloseSelector,
@@ -25,6 +34,8 @@ function AlgorithmInstallationUi({
       <AlgorithmSelector
         disabled={disabled}
         previewId={previewId}
+        sections={sections}
+        title={selectorTitle}
         onPreview={onPreview}
         onSelect={onSelectAlgorithm}
         onClose={onCloseSelector}
@@ -39,7 +50,7 @@ function AlgorithmInstallationUi({
       onClick={onOpenSelector}
       disabled={disabled}
     >
-      Choose Algorithm
+      {chooseLabel}
     </button>
   )
 }

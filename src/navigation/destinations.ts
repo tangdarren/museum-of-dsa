@@ -1,4 +1,13 @@
-import type { AlgorithmCategory, AlgorithmId } from '../types/algorithm'
+import type {
+  AlgorithmCategory,
+  AlgorithmId,
+  AlgorithmRoomCategory,
+  LinkedListCategory,
+} from '../types/algorithm'
+import {
+  isAlgorithmRoomCategory,
+  isLinkedListCategory,
+} from '../types/algorithm'
 
 export type Vec3 = [number, number, number]
 
@@ -36,6 +45,7 @@ export const FRONT_BACK = -ROOM_DEPTH / 2
 export const LOBBY_CENTER_Z = FRONT_BACK - LOBBY_DEPTH / 2
 export const LOBBY_BACK = FRONT_BACK - LOBBY_DEPTH
 export const ALGORITHMS_CENTER_X = LOBBY_DOOR_OFFSET
+export const DATA_STRUCTURES_CENTER_X = -LOBBY_DOOR_OFFSET
 export const ALGORITHMS_CENTER_Z = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH / 2
 export const ALGORITHMS_BACK = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH
 
@@ -47,6 +57,18 @@ export const ALGORITHM_INSTALLATION_POSITION: Vec3 = [
 
 export const ALGORITHM_INSTALLATION_LOOK_AT: Vec3 = [
   ALGORITHMS_CENTER_X,
+  3.15,
+  ALGORITHMS_BACK + 1.15,
+]
+
+export const DATA_STRUCTURE_INSTALLATION_POSITION: Vec3 = [
+  DATA_STRUCTURES_CENTER_X,
+  0,
+  ALGORITHMS_BACK + 1.15,
+]
+
+export const DATA_STRUCTURE_INSTALLATION_LOOK_AT: Vec3 = [
+  DATA_STRUCTURES_CENTER_X,
   3.15,
   ALGORITHMS_BACK + 1.15,
 ]
@@ -64,8 +86,8 @@ export const MUSEUM_DESTINATIONS: Record<MuseumLocation, MuseumDestination> = {
   },
   'data-structures': {
     id: 'data-structures',
-    cameraPosition: [-LOBBY_DOOR_OFFSET, 3.25, LOBBY_BACK + 6.2],
-    lookAt: [-LOBBY_DOOR_OFFSET, 2.6, LOBBY_BACK],
+    cameraPosition: [DATA_STRUCTURES_CENTER_X, 3.15, LOBBY_BACK - 2.2],
+    lookAt: DATA_STRUCTURE_INSTALLATION_LOOK_AT,
   },
   algorithms: {
     id: 'algorithms',
@@ -80,10 +102,20 @@ export const ALGORITHM_FOCUS_DESTINATION: MuseumDestination = {
   lookAt: ALGORITHM_INSTALLATION_LOOK_AT,
 }
 
+export const DATA_STRUCTURE_FOCUS_DESTINATION: MuseumDestination = {
+  id: 'data-structure-focus',
+  cameraPosition: [DATA_STRUCTURES_CENTER_X, 3.1, LOBBY_BACK - 4.0],
+  lookAt: DATA_STRUCTURE_INSTALLATION_LOOK_AT,
+}
+
 const ALGORITHMS_LEFT_WALL_X =
   ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
 const ALGORITHMS_RIGHT_WALL_X =
   ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
+const DATA_STRUCTURES_LEFT_WALL_X =
+  DATA_STRUCTURES_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
+const DATA_STRUCTURES_RIGHT_WALL_X =
+  DATA_STRUCTURES_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
 const GALLERY_FRONT_Z = ALGORITHMS_CENTER_Z + 2.55
 const GALLERY_BACK_Z = ALGORITHMS_CENTER_Z - 2.15
 const GALLERY_VIEW_DISTANCE = 4.55
@@ -98,7 +130,7 @@ export type AlgorithmGalleryPlacement = {
 }
 
 export const ALGORITHM_GALLERY_PLACEMENTS: Record<
-  AlgorithmCategory,
+  AlgorithmRoomCategory,
   AlgorithmGalleryPlacement
 > = {
   'Graph Traversal': {
@@ -123,20 +155,23 @@ export const ALGORITHM_GALLERY_PLACEMENTS: Record<
   },
 }
 
-function galleryCameraX(side: AlgorithmGallerySide) {
+function galleryCameraX(side: AlgorithmGallerySide, centerX: number) {
+  const leftX = centerX - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
+  const rightX = centerX + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
+
   return side === 'left'
-    ? ALGORITHMS_LEFT_WALL_X + GALLERY_VIEW_DISTANCE
-    : ALGORITHMS_RIGHT_WALL_X - GALLERY_VIEW_DISTANCE
+    ? leftX + GALLERY_VIEW_DISTANCE
+    : rightX - GALLERY_VIEW_DISTANCE
 }
 
 export const ALGORITHM_GALLERY_DESTINATIONS: Record<
-  AlgorithmCategory,
+  AlgorithmRoomCategory,
   MuseumDestination
 > = {
   'Graph Traversal': {
     id: 'gallery-graph-traversal',
     cameraPosition: [
-      galleryCameraX('left'),
+      galleryCameraX('left', ALGORITHMS_CENTER_X),
       3.22,
       GALLERY_FRONT_Z,
     ],
@@ -145,7 +180,7 @@ export const ALGORITHM_GALLERY_DESTINATIONS: Record<
   Pathfinding: {
     id: 'gallery-pathfinding',
     cameraPosition: [
-      galleryCameraX('left'),
+      galleryCameraX('left', ALGORITHMS_CENTER_X),
       3.22,
       GALLERY_BACK_Z,
     ],
@@ -154,7 +189,7 @@ export const ALGORITHM_GALLERY_DESTINATIONS: Record<
   Sorting: {
     id: 'gallery-sorting',
     cameraPosition: [
-      galleryCameraX('right'),
+      galleryCameraX('right', ALGORITHMS_CENTER_X),
       3.22,
       GALLERY_FRONT_Z,
     ],
@@ -163,11 +198,51 @@ export const ALGORITHM_GALLERY_DESTINATIONS: Record<
   Trees: {
     id: 'gallery-trees',
     cameraPosition: [
-      galleryCameraX('right'),
+      galleryCameraX('right', ALGORITHMS_CENTER_X),
       3.22,
       GALLERY_BACK_Z,
     ],
     lookAt: [ALGORITHMS_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
+  },
+}
+
+export const DATA_STRUCTURE_GALLERY_PLACEMENTS: Record<
+  LinkedListCategory,
+  AlgorithmGalleryPlacement
+> = {
+  'Singly Linked List': {
+    side: 'left',
+    position: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
+    rotation: [0, Math.PI / 2, 0],
+  },
+  'Doubly Linked List': {
+    side: 'right',
+    position: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
+    rotation: [0, -Math.PI / 2, 0],
+  },
+}
+
+export const DATA_STRUCTURE_GALLERY_DESTINATIONS: Record<
+  LinkedListCategory,
+  MuseumDestination
+> = {
+  'Singly Linked List': {
+    id: 'gallery-singly-linked-list',
+    cameraPosition: [
+      galleryCameraX('left', DATA_STRUCTURES_CENTER_X),
+      3.22,
+      GALLERY_FRONT_Z,
+    ],
+    lookAt: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
+  },
+  'Doubly Linked List': {
+    id: 'gallery-doubly-linked-list',
+    cameraPosition: [
+      galleryCameraX('right', DATA_STRUCTURES_CENTER_X),
+      3.22,
+      GALLERY_FRONT_Z,
+    ],
+    lookAt: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
   },
 }
 
@@ -180,8 +255,24 @@ export function getMuseumDestination(
     return ALGORITHM_FOCUS_DESTINATION
   }
 
-  if (location === 'algorithms' && selectedGallery) {
+  if (
+    location === 'algorithms' &&
+    selectedGallery &&
+    isAlgorithmRoomCategory(selectedGallery)
+  ) {
     return ALGORITHM_GALLERY_DESTINATIONS[selectedGallery]
+  }
+
+  if (location === 'data-structures' && selectedAlgorithm) {
+    return DATA_STRUCTURE_FOCUS_DESTINATION
+  }
+
+  if (
+    location === 'data-structures' &&
+    selectedGallery &&
+    isLinkedListCategory(selectedGallery)
+  ) {
+    return DATA_STRUCTURE_GALLERY_DESTINATIONS[selectedGallery]
   }
 
   return MUSEUM_DESTINATIONS[location]

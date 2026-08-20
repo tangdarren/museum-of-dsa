@@ -2,7 +2,12 @@ import { Canvas } from '@react-three/fiber'
 import { useCallback, useMemo, useState } from 'react'
 import {
   getAlgorithmSteps,
+  getLinkedListVariantForAlgorithm,
+  isLinkedListAlgorithm,
   isSortingCategory,
+  usesLinkedListDelete,
+  usesLinkedListInsert,
+  usesLinkedListSearch,
   usesStartNodeSelection,
   usesTargetNodeSelection,
   usesTreeTargetSelection,
@@ -13,17 +18,34 @@ import AlgorithmGalleryUi from './components/museum/AlgorithmGalleryUi'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
 import EntranceSequence from './components/museum/EntranceSequence'
-import { getAlgorithmById, getGalleryEntries } from './data/algorithms'
+import {
+  ALGORITHM_SECTIONS,
+  DATA_STRUCTURE_SECTIONS,
+  getAlgorithmById,
+  getGalleryEntries,
+} from './data/algorithms'
+import { getLinkedListExhibitPrimer } from './data/linkedListOperations'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
 import {
   createDefaultSortingValues,
   createRandomSortingValues,
 } from './data/sampleSorting'
 import {
-  SAMPLE_TREE,
   createDefaultTreeSearchTarget,
   getTreeSearchTargetGroups,
+  SAMPLE_TREE,
 } from './data/sampleTree'
+import {
+  createDefaultLinkedListSearchTarget,
+  DEFAULT_LINKED_LIST_DELETE_POSITION,
+  DEFAULT_LINKED_LIST_INSERT_POSITION,
+  DEFAULT_LINKED_LIST_INSERT_VALUE,
+  getLinkedListSearchTargetGroups,
+  getSampleLinkedList,
+  LINKED_LIST_INSERT_VALUES,
+  LINKED_LIST_MUTATION_POSITIONS,
+  linkedListMutationPositionKey,
+} from './data/sampleLinkedList'
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
@@ -33,6 +55,7 @@ import {
 } from './navigation/destinations'
 import MuseumScene from './scenes/MuseumScene'
 import type { AlgorithmCategory, AlgorithmId } from './types/algorithm'
+import type { LinkedListMutationPosition } from './types/linkedList'
 
 type AlgorithmViewPhase = 'transitioning' | 'overview' | 'gallery' | 'focused'
 
@@ -58,6 +81,16 @@ function App() {
   const [treeTargetValue, setTreeTargetValue] = useState(() =>
     createDefaultTreeSearchTarget(SAMPLE_TREE),
   )
+  const [linkedListSearchTarget, setLinkedListSearchTarget] = useState(() =>
+    createDefaultLinkedListSearchTarget(),
+  )
+  const [linkedListInsertValue, setLinkedListInsertValue] = useState(
+    DEFAULT_LINKED_LIST_INSERT_VALUE,
+  )
+  const [linkedListInsertPosition, setLinkedListInsertPosition] =
+    useState<LinkedListMutationPosition>(DEFAULT_LINKED_LIST_INSERT_POSITION)
+  const [linkedListDeletePosition, setLinkedListDeletePosition] =
+    useState<LinkedListMutationPosition>(DEFAULT_LINKED_LIST_DELETE_POSITION)
   const treeSearchTargets = useMemo(
     () => getTreeSearchTargetGroups(SAMPLE_TREE),
     [],
@@ -98,6 +131,28 @@ function App() {
   const showingTreeSearch = Boolean(
     selectedAlgorithmId && usesTreeTargetSelection(selectedAlgorithmId),
   )
+  const showingLinkedList = Boolean(
+    selectedAlgorithmId && isLinkedListAlgorithm(selectedAlgorithmId),
+  )
+  const linkedListVariant = selectedAlgorithmId
+    ? getLinkedListVariantForAlgorithm(selectedAlgorithmId)
+    : null
+  const linkedList = linkedListVariant
+    ? getSampleLinkedList(linkedListVariant)
+    : getSampleLinkedList('singly')
+  const linkedListSearchTargets = useMemo(
+    () => getLinkedListSearchTargetGroups(linkedList),
+    [linkedList],
+  )
+  const showingLinkedListSearch = Boolean(
+    selectedAlgorithmId && usesLinkedListSearch(selectedAlgorithmId),
+  )
+  const showingLinkedListInsert = Boolean(
+    selectedAlgorithmId && usesLinkedListInsert(selectedAlgorithmId),
+  )
+  const showingLinkedListDelete = Boolean(
+    selectedAlgorithmId && usesLinkedListDelete(selectedAlgorithmId),
+  )
   const steps = useMemo(
     () =>
       selectedAlgorithmId
@@ -107,14 +162,32 @@ function App() {
             targetNodeId,
             values: sortingValues,
             tree: SAMPLE_TREE,
-            targetValue: treeTargetValue,
+            targetValue: showingLinkedListSearch
+              ? linkedListSearchTarget
+              : treeTargetValue,
+            list: linkedList,
+            insertValue: linkedListInsertValue,
+            insertPosition: linkedListInsertPosition,
+            deletePosition: linkedListDeletePosition,
           })
         : [],
-    [selectedAlgorithmId, startNodeId, targetNodeId, sortingValues, treeTargetValue],
+    [
+      selectedAlgorithmId,
+      startNodeId,
+      targetNodeId,
+      sortingValues,
+      treeTargetValue,
+      linkedList,
+      linkedListSearchTarget,
+      linkedListInsertValue,
+      linkedListInsertPosition,
+      linkedListDeletePosition,
+      showingLinkedListSearch,
+    ],
   )
   const playback = useAlgorithmPlayback(
     steps,
-    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}:${treeTargetValue}`,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}:${treeTargetValue}:${linkedList.variant}:${linkedListSearchTarget}:${linkedListInsertValue}:${linkedListMutationPositionKey(linkedListInsertPosition)}:${linkedListMutationPositionKey(linkedListDeletePosition)}`,
   )
   const canResetPlayback = Boolean(
     selectedAlgorithmId &&
@@ -122,14 +195,27 @@ function App() {
         ? startNodeId
         : steps.length > 0),
   )
+  const isExhibitHall =
+    location === 'algorithms' || location === 'data-structures'
   const algorithmViewPhase: AlgorithmViewPhase =
-    location !== 'algorithms' || isTransitioning
+    !isExhibitHall || isTransitioning
       ? 'transitioning'
       : selectedAlgorithmId
         ? 'focused'
         : selectedGallery
           ? 'gallery'
           : 'overview'
+  const hallLabel =
+    location === 'data-structures' ? 'Data Structures' : 'Algorithms'
+  const catalogSections =
+    location === 'data-structures' ? DATA_STRUCTURE_SECTIONS : ALGORITHM_SECTIONS
+
+  const resetLinkedListInputs = useCallback(() => {
+    setLinkedListSearchTarget(createDefaultLinkedListSearchTarget())
+    setLinkedListInsertValue(DEFAULT_LINKED_LIST_INSERT_VALUE)
+    setLinkedListInsertPosition(DEFAULT_LINKED_LIST_INSERT_POSITION)
+    setLinkedListDeletePosition(DEFAULT_LINKED_LIST_DELETE_POSITION)
+  }, [])
 
   const goToLocation = useCallback(
     (next: MuseumLocation) => {
@@ -146,11 +232,12 @@ function App() {
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
       setTargetNodeId(null)
+      resetLinkedListInputs()
       setSelectorOpen(false)
       setLocation(next)
       setIsTransitioning(true)
     },
-    [isTransitioning, location, selectedAlgorithmId],
+    [isTransitioning, location, resetLinkedListInputs, selectedAlgorithmId],
   )
 
   const handleEnterMuseum = useCallback(() => {
@@ -173,6 +260,7 @@ function App() {
       setPreviewAlgorithmId(null)
       setStartNodeId(null)
       setTargetNodeId(null)
+      resetLinkedListInputs()
 
       if (gallery) {
         setSelectedGallery(gallery)
@@ -181,7 +269,7 @@ function App() {
       setSelectedAlgorithmId(id)
       setIsTransitioning(true)
     },
-    [isTransitioning],
+    [isTransitioning, resetLinkedListInputs],
   )
 
   const handleSelectGallery = useCallback(
@@ -199,10 +287,11 @@ function App() {
       setSelectedAlgorithmId(null)
       setStartNodeId(null)
       setTargetNodeId(null)
+      resetLinkedListInputs()
       setSelectedGallery(category)
       setIsTransitioning(true)
     },
-    [isTransitioning, selectedAlgorithmId, selectedGallery],
+    [isTransitioning, resetLinkedListInputs, selectedAlgorithmId, selectedGallery],
   )
 
   const handleBackToAlgorithms = useCallback(() => {
@@ -214,9 +303,10 @@ function App() {
     setPreviewAlgorithmId(null)
     setStartNodeId(null)
     setTargetNodeId(null)
+    resetLinkedListInputs()
     setSelectorOpen(false)
     setIsTransitioning(true)
-  }, [isTransitioning])
+  }, [isTransitioning, resetLinkedListInputs])
 
   const handleBackToHall = useCallback(() => {
     if (isTransitioning) {
@@ -257,8 +347,15 @@ function App() {
       return
     }
 
+    if (selectedAlgorithmId && isLinkedListAlgorithm(selectedAlgorithmId)) {
+      playback.pause()
+      resetLinkedListInputs()
+      playback.reset()
+      return
+    }
+
     playback.reset()
-  }, [playback, selectedAlgorithmId])
+  }, [playback, resetLinkedListInputs, selectedAlgorithmId])
 
   const handleRandomizeArray = useCallback(() => {
     playback.pause()
@@ -276,6 +373,58 @@ function App() {
     (value: number) => {
       playback.pause()
       setTreeTargetValue(value)
+      playback.reset()
+    },
+    [playback],
+  )
+
+  const handleSelectLinkedListSearchTarget = useCallback(
+    (value: number) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      setLinkedListSearchTarget(value)
+      playback.reset()
+    },
+    [playback],
+  )
+
+  const handleSelectLinkedListInsertValue = useCallback(
+    (value: number) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      setLinkedListInsertValue(value)
+      playback.reset()
+    },
+    [playback],
+  )
+
+  const handleSelectLinkedListInsertPosition = useCallback(
+    (position: LinkedListMutationPosition) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      setLinkedListInsertPosition(position)
+      playback.reset()
+    },
+    [playback],
+  )
+
+  const handleSelectLinkedListDeletePosition = useCallback(
+    (position: LinkedListMutationPosition) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      setLinkedListDeletePosition(position)
       playback.reset()
     },
     [playback],
@@ -320,13 +469,12 @@ function App() {
               : undefined
           }
           onSelectAlgorithms={() => goToLocation('algorithms')}
+          onSelectDataStructures={() => goToLocation('data-structures')}
           selectedGallery={selectedGallery}
           onSelectGallery={handleSelectGallery}
           onSelectGalleryAlgorithm={handleSelectAlgorithm}
           galleryInteractive={
-            location === 'algorithms' &&
-            !selectedAlgorithmId &&
-            !isTransitioning
+            isExhibitHall && !selectedAlgorithmId && !isTransitioning
           }
           isTransitioning={isTransitioning}
           showEntranceLettering={enterButton === 'gone'}
@@ -355,6 +503,17 @@ function App() {
               selectorOpen
               disabled={false}
               previewId={previewAlgorithmId}
+              sections={catalogSections}
+              chooseLabel={
+                location === 'data-structures'
+                  ? 'Choose Operation'
+                  : 'Choose Algorithm'
+              }
+              selectorTitle={
+                location === 'data-structures'
+                  ? 'Choose operation'
+                  : 'Choose algorithm'
+              }
               onPreview={setPreviewAlgorithmId}
               onOpenSelector={() => setSelectorOpen(true)}
               onCloseSelector={() => {
@@ -369,6 +528,17 @@ function App() {
                 selectorOpen={false}
                 disabled={false}
                 previewId={previewAlgorithmId}
+                sections={catalogSections}
+                chooseLabel={
+                  location === 'data-structures'
+                    ? 'Choose Operation'
+                    : 'Choose Algorithm'
+                }
+                selectorTitle={
+                  location === 'data-structures'
+                    ? 'Choose operation'
+                    : 'Choose algorithm'
+                }
                 onPreview={setPreviewAlgorithmId}
                 onOpenSelector={() => setSelectorOpen(true)}
                 onCloseSelector={() => {
@@ -388,7 +558,7 @@ function App() {
             className="museum-button lobby-button"
             onClick={handleBackToHall}
           >
-            ← Algorithms
+            ← {hallLabel}
           </button>
           <AlgorithmGalleryUi
             category={selectedGallery}
@@ -406,11 +576,14 @@ function App() {
             className="museum-button lobby-button"
             onClick={handleBackToAlgorithms}
           >
-            {selectedGallery ? `← ${selectedGallery}` : '← Algorithms'}
+            {selectedGallery ? `← ${selectedGallery}` : `← ${hallLabel}`}
           </button>
           <AlgorithmLegend algorithmId={selectedAlgorithm.id} />
           <div className="algorithm-focused-ui">
-            <AlgorithmPlaque algorithm={selectedAlgorithm} />
+            <AlgorithmPlaque
+              algorithm={selectedAlgorithm}
+              primer={getLinkedListExhibitPrimer(selectedAlgorithm.category)}
+            />
             <AlgorithmPlaybackView
               playback={playback}
               onReset={handlePlaybackReset}
@@ -437,6 +610,48 @@ function App() {
                       presentValues: treeSearchTargets.present,
                       missingValues: treeSearchTargets.missing,
                       onSelectTarget: handleSelectTreeSearchTarget,
+                    }
+                  : undefined
+              }
+              linkedList={
+                showingLinkedList &&
+                (showingLinkedListSearch ||
+                  showingLinkedListInsert ||
+                  showingLinkedListDelete)
+                  ? {
+                      mode: showingLinkedListSearch
+                        ? 'search'
+                        : showingLinkedListInsert
+                          ? 'insert'
+                          : 'delete',
+                      disabled: playback.isPlaying,
+                      search: showingLinkedListSearch
+                        ? {
+                            targetValue: linkedListSearchTarget,
+                            presentValues: linkedListSearchTargets.present,
+                            missingValues: linkedListSearchTargets.missing,
+                            onSelectTarget: handleSelectLinkedListSearchTarget,
+                          }
+                        : undefined,
+                      insert: showingLinkedListInsert
+                        ? {
+                            value: linkedListInsertValue,
+                            values: [...LINKED_LIST_INSERT_VALUES],
+                            position: linkedListInsertPosition,
+                            positions: LINKED_LIST_MUTATION_POSITIONS,
+                            onSelectValue: handleSelectLinkedListInsertValue,
+                            onSelectPosition:
+                              handleSelectLinkedListInsertPosition,
+                          }
+                        : undefined,
+                      delete: showingLinkedListDelete
+                        ? {
+                            position: linkedListDeletePosition,
+                            positions: LINKED_LIST_MUTATION_POSITIONS,
+                            onSelectPosition:
+                              handleSelectLinkedListDeletePosition,
+                          }
+                        : undefined,
                     }
                   : undefined
               }

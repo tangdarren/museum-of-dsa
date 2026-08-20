@@ -11,10 +11,27 @@ export type AlgorithmId =
   | 'inorder-traversal'
   | 'postorder-traversal'
   | 'bst-search'
+  | 'singly-linked-list-traverse'
+  | 'singly-linked-list-search'
+  | 'singly-linked-list-insert'
+  | 'singly-linked-list-delete'
+  | 'doubly-linked-list-traverse-forward'
+  | 'doubly-linked-list-traverse-backward'
+  | 'doubly-linked-list-search'
+  | 'doubly-linked-list-insert'
+  | 'doubly-linked-list-delete'
 
 export type FutureAlgorithmId = 'bst-insert'
 
-export type AlgorithmCategory = 'Graph Traversal' | 'Pathfinding' | 'Sorting' | 'Trees'
+export type AlgorithmRoomCategory =
+  | 'Graph Traversal'
+  | 'Pathfinding'
+  | 'Sorting'
+  | 'Trees'
+
+export type LinkedListCategory = 'Singly Linked List' | 'Doubly Linked List'
+
+export type AlgorithmCategory = AlgorithmRoomCategory | LinkedListCategory
 
 export type AlgorithmComplexity = {
   time: string
@@ -42,3 +59,27 @@ export type FutureAlgorithmDefinition = {
 export type AlgorithmCatalogEntry =
   | AlgorithmDefinition
   | FutureAlgorithmDefinition
+
+export type AlgorithmCatalogSection = {
+  category: AlgorithmCategory
+  entries: AlgorithmCatalogEntry[]
+}
+
+export function isAlgorithmRoomCategory(
+  category: AlgorithmCategory,
+): category is AlgorithmRoomCategory {
+  return (
+    category === 'Graph Traversal' ||
+    category === 'Pathfinding' ||
+    category === 'Sorting' ||
+    category === 'Trees'
+  )
+}
+
+export function isLinkedListCategory(
+  category: AlgorithmCategory,
+): category is LinkedListCategory {
+  return (
+    category === 'Singly Linked List' || category === 'Doubly Linked List'
+  )
+}

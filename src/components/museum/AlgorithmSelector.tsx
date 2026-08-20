@@ -1,9 +1,14 @@
+import type {
+  AlgorithmCatalogSection,
+  AlgorithmId,
+} from '../../types/algorithm'
 import { ALGORITHM_SECTIONS } from '../../data/algorithms'
-import type { AlgorithmId } from '../../types/algorithm'
 
 type AlgorithmSelectorProps = {
   disabled?: boolean
   previewId: AlgorithmId | null
+  sections?: AlgorithmCatalogSection[]
+  title?: string
   onPreview: (id: AlgorithmId | null) => void
   onSelect: (id: AlgorithmId) => void
   onClose: () => void
@@ -12,6 +17,8 @@ type AlgorithmSelectorProps = {
 function AlgorithmSelector({
   disabled = false,
   previewId,
+  sections = ALGORITHM_SECTIONS,
+  title = 'Choose algorithm',
   onPreview,
   onSelect,
   onClose,
@@ -21,7 +28,7 @@ function AlgorithmSelector({
       className="algorithm-selector"
       role="dialog"
       aria-modal="true"
-      aria-label="Choose algorithm"
+      aria-label={title}
       onMouseLeave={(event) => {
         if (!event.currentTarget.contains(document.activeElement)) {
           onPreview(null)
@@ -44,7 +51,7 @@ function AlgorithmSelector({
           Close
         </button>
       </div>
-      {ALGORITHM_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <section key={section.category} className="algorithm-selector-section">
           <h3>{section.category}</h3>
           <div className="algorithm-selector-list">

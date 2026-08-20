@@ -2,6 +2,12 @@ import type { AlgorithmPlayback } from '../../hooks/useAlgorithmPlayback'
 import type { AlgorithmId } from '../../types/algorithm'
 import type { SortingMetrics } from '../../types/sorting'
 import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
+import LinkedListControls, {
+  type LinkedListControlMode,
+  type LinkedListDeleteControls,
+  type LinkedListInsertControls,
+  type LinkedListSearchControls,
+} from './LinkedListControls'
 import SortingArrayControls from './SortingArrayControls'
 import SortingMetricsDisplay from './SortingMetricsDisplay'
 import TreeSearchControls from './TreeSearchControls'
@@ -21,6 +27,14 @@ export type TreeSearchPlaybackExtras = {
   onSelectTarget: (value: number) => void
 }
 
+export type LinkedListPlaybackExtras = {
+  mode: LinkedListControlMode
+  disabled?: boolean
+  search?: LinkedListSearchControls
+  insert?: LinkedListInsertControls
+  delete?: LinkedListDeleteControls
+}
+
 type AlgorithmPlaybackViewProps = {
   playback: AlgorithmPlayback
   disabled?: boolean
@@ -29,6 +43,7 @@ type AlgorithmPlaybackViewProps = {
   selectionPrompt?: 'start' | 'target' | null
   sorting?: SortingPlaybackExtras
   treeSearch?: TreeSearchPlaybackExtras
+  linkedList?: LinkedListPlaybackExtras
 }
 
 function AlgorithmPlaybackView({
@@ -39,11 +54,13 @@ function AlgorithmPlaybackView({
   selectionPrompt = null,
   sorting,
   treeSearch,
+  linkedList,
 }: AlgorithmPlaybackViewProps) {
   const auxiliary = playback.currentStep?.auxiliaryData
   const metrics = playback.currentStep?.metrics
   const inspection = playback.currentStep?.inspection
   const pathResult = playback.currentStep?.pathResult
+  const linkedListSnapshot = playback.currentStep?.linkedListSnapshot
   const traversalOrder =
     playback.currentStep?.snapshot?.traversalOrder ??
     playback.currentStep?.treeSnapshot?.traversalOrder
@@ -55,6 +72,8 @@ function AlgorithmPlaybackView({
     playback.isComplete &&
     Boolean(pathResult) &&
     Boolean(playback.currentStep?.treeSnapshot)
+  const isLinkedListSearchComplete =
+    playback.isComplete && Boolean(pathResult) && Boolean(linkedListSnapshot)
   const isTraversalComplete =
     playback.isComplete && Boolean(traversalOrder && traversalOrder.length > 0)
   const isSortingComplete =
@@ -67,7 +86,7 @@ function AlgorithmPlaybackView({
         ? pathResult?.found
           ? 'Path found'
           : 'No path found'
-        : isTreeSearchComplete
+        : isTreeSearchComplete || isLinkedListSearchComplete
           ? pathResult?.found
             ? 'Value found'
             : 'Value not found'
@@ -122,6 +141,23 @@ function AlgorithmPlaybackView({
           ) : null}
         </div>
       ) : null}
+      {isLinkedListSearchComplete && pathResult ? (
+        <div className="algorithm-playback-summary">
+          {pathResult.nodes.length > 0 ? (
+            <>
+              <p className="algorithm-playback-auxiliary-label">Search path</p>
+              <p className="algorithm-playback-order">
+                {pathResult.nodes.join(' → ')}
+              </p>
+            </>
+          ) : null}
+          {pathResult.exploredCount !== undefined ? (
+            <p className="algorithm-playback-cost">
+              Nodes visited {pathResult.exploredCount}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       {isTraversalComplete && traversalOrder ? (
         <div className="algorithm-playback-summary">
           <p className="algorithm-playback-auxiliary-label">Traversal order</p>
@@ -154,7 +190,11 @@ function AlgorithmPlaybackView({
           metrics={sorting.metrics}
           isComplete={playback.isComplete}
         />
-      ) : metrics && !isPathComplete && !isTreeSearchComplete && !isTraversalComplete ? (
+      ) : metrics &&
+        !isPathComplete &&
+        !isTreeSearchComplete &&
+        !isLinkedListSearchComplete &&
+        !isTraversalComplete ? (
         <div className="algorithm-playback-metrics">
           <p className="algorithm-playback-auxiliary-label">{metrics.label}</p>
           <table>
@@ -226,6 +266,15 @@ function AlgorithmPlaybackView({
           presentValues={treeSearch.presentValues}
           missingValues={treeSearch.missingValues}
           onSelectTarget={treeSearch.onSelectTarget}
+        />
+      ) : null}
+      {linkedList ? (
+        <LinkedListControls
+          disabled={linkedList.disabled ?? disabled}
+          mode={linkedList.mode}
+          search={linkedList.search}
+          insert={linkedList.insert}
+          delete={linkedList.delete}
         />
       ) : null}
     </section>

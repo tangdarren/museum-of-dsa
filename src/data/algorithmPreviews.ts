@@ -1,10 +1,19 @@
 import { copyTreeEdges, copyTreeNodes } from '../algorithms/treeShared'
+import {
+  createLinkedListSnapshot,
+  createLinkedListState,
+} from '../algorithms/linkedListShared'
 import type { AlgorithmId } from '../types/algorithm'
 import type {
+  AlgorithmLinkedListSnapshot,
   AlgorithmSortingSnapshot,
   AlgorithmTreeSnapshot,
 } from '../types/algorithmStep'
 import type { GraphEdgeStates, GraphNodeStates } from '../types/graph'
+import {
+  SAMPLE_DOUBLY_LINKED_LIST,
+  SAMPLE_LINKED_LIST,
+} from './sampleLinkedList'
 import { SAMPLE_SORTING_DATA } from './sampleSorting'
 import { SAMPLE_TREE } from './sampleTree'
 
@@ -25,10 +34,16 @@ export type TreeAlgorithmPreview = {
   snapshot: AlgorithmTreeSnapshot
 }
 
+export type LinkedListAlgorithmPreview = {
+  visualization: 'linked-list'
+  snapshot: AlgorithmLinkedListSnapshot
+}
+
 export type AlgorithmPreview =
   | GraphAlgorithmPreview
   | SortingAlgorithmPreview
   | TreeAlgorithmPreview
+  | LinkedListAlgorithmPreview
 
 const SORTING_PREVIEW_VALUES = [...SAMPLE_SORTING_DATA.values]
 
@@ -203,5 +218,121 @@ export const ALGORITHM_PREVIEWS: Record<AlgorithmId, AlgorithmPreview> = {
       pathEdgeIds: ['8-4'],
       comparisonDirection: 'left',
     },
+  },
+  'singly-linked-list-traverse': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(createLinkedListState(SAMPLE_LINKED_LIST), {
+      phase: 'traverse',
+      currentNodeId: '2',
+      visitedNodeIds: ['4', '7'],
+      highlightedNodeIds: ['9'],
+    }),
+  },
+  'singly-linked-list-search': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(createLinkedListState(SAMPLE_LINKED_LIST), {
+      phase: 'compare',
+      currentNodeId: '9',
+      targetNodeId: '9',
+      visitedNodeIds: ['4', '7', '2'],
+      comparedNodeIds: ['9'],
+      foundNodeId: '9',
+      searchResult: 'found',
+    }),
+  },
+  'singly-linked-list-insert': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(createLinkedListState(SAMPLE_LINKED_LIST), {
+      phase: 'relink',
+      currentNodeId: '4',
+      insertingNodeId: '4',
+      highlightedNodeIds: ['7'],
+      pointerChanges: [
+        { pointer: 'next', fromNodeId: '4', toNodeId: '7' },
+        { pointer: 'head', toNodeId: '4' },
+      ],
+    }),
+  },
+  'singly-linked-list-delete': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(createLinkedListState(SAMPLE_LINKED_LIST), {
+      phase: 'relink',
+      currentNodeId: '9',
+      deletingNodeId: '6',
+      highlightedNodeIds: ['9'],
+      pointerChanges: [{ pointer: 'next', fromNodeId: '9', toNodeId: null }],
+    }),
+  },
+  'doubly-linked-list-traverse-forward': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(
+      createLinkedListState(SAMPLE_DOUBLY_LINKED_LIST),
+      {
+        phase: 'traverse',
+        currentNodeId: '2',
+        visitedNodeIds: ['4', '7'],
+        highlightedNodeIds: ['9'],
+      },
+    ),
+  },
+  'doubly-linked-list-traverse-backward': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(
+      createLinkedListState(SAMPLE_DOUBLY_LINKED_LIST),
+      {
+        phase: 'traverse',
+        currentNodeId: '9',
+        visitedNodeIds: ['6'],
+        highlightedNodeIds: ['2'],
+      },
+    ),
+  },
+  'doubly-linked-list-search': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(
+      createLinkedListState(SAMPLE_DOUBLY_LINKED_LIST),
+      {
+        phase: 'compare',
+        currentNodeId: '9',
+        targetNodeId: '9',
+        visitedNodeIds: ['4', '7', '2'],
+        comparedNodeIds: ['9'],
+        foundNodeId: '9',
+        searchResult: 'found',
+      },
+    ),
+  },
+  'doubly-linked-list-insert': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(
+      createLinkedListState(SAMPLE_DOUBLY_LINKED_LIST),
+      {
+        phase: 'relink',
+        currentNodeId: '4',
+        insertingNodeId: '4',
+        highlightedNodeIds: ['7'],
+        pointerChanges: [
+          { pointer: 'next', fromNodeId: '4', toNodeId: '7' },
+          { pointer: 'previous', fromNodeId: '7', toNodeId: '4' },
+          { pointer: 'head', toNodeId: '4' },
+        ],
+      },
+    ),
+  },
+  'doubly-linked-list-delete': {
+    visualization: 'linked-list',
+    snapshot: createLinkedListSnapshot(
+      createLinkedListState(SAMPLE_DOUBLY_LINKED_LIST),
+      {
+        phase: 'relink',
+        currentNodeId: '9',
+        deletingNodeId: '6',
+        highlightedNodeIds: ['9'],
+        pointerChanges: [
+          { pointer: 'next', fromNodeId: '9', toNodeId: null },
+          { pointer: 'tail', fromNodeId: '6', toNodeId: '9' },
+        ],
+      },
+    ),
   },
 }

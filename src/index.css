@@ -470,10 +470,10 @@ body {
   line-height: 1.25;
 }
 
-.algorithm-plaque-description {
+.algorithm-plaque-primer {
   margin: 0 0 0.7rem;
   color: #5c5348;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   line-height: 1.4;
 }
 
@@ -787,7 +787,8 @@ body {
   gap: 0.45rem;
 }
 
-.tree-search-controls {
+.tree-search-controls,
+.linked-list-controls {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -795,7 +796,8 @@ body {
   margin: 0.15rem 0 0;
 }
 
-.tree-search-buttons {
+.tree-search-buttons,
+.linked-list-buttons {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
