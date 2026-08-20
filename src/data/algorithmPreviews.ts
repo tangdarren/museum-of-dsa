@@ -3,8 +3,14 @@ import {
   createLinkedListSnapshot,
   createLinkedListState,
 } from '../algorithms/linkedListShared'
+import {
+  createHashComputation,
+  createHashTableSnapshot,
+  createHashTableState,
+} from '../algorithms/hashTableShared'
 import type { AlgorithmId } from '../types/algorithm'
 import type {
+  AlgorithmHashTableSnapshot,
   AlgorithmLinkedListSnapshot,
   AlgorithmSortingSnapshot,
   AlgorithmTreeSnapshot,
@@ -14,6 +20,7 @@ import {
   SAMPLE_DOUBLY_LINKED_LIST,
   SAMPLE_LINKED_LIST,
 } from './sampleLinkedList'
+import { SAMPLE_HASH_TABLE } from './sampleHashTable'
 import { SAMPLE_SORTING_DATA } from './sampleSorting'
 import { SAMPLE_TREE } from './sampleTree'
 
@@ -39,11 +46,17 @@ export type LinkedListAlgorithmPreview = {
   snapshot: AlgorithmLinkedListSnapshot
 }
 
+export type HashTableAlgorithmPreview = {
+  visualization: 'hash-table'
+  snapshot: AlgorithmHashTableSnapshot
+}
+
 export type AlgorithmPreview =
   | GraphAlgorithmPreview
   | SortingAlgorithmPreview
   | TreeAlgorithmPreview
   | LinkedListAlgorithmPreview
+  | HashTableAlgorithmPreview
 
 const SORTING_PREVIEW_VALUES = [...SAMPLE_SORTING_DATA.values]
 
@@ -334,5 +347,56 @@ export const ALGORITHM_PREVIEWS: Record<AlgorithmId, AlgorithmPreview> = {
         ],
       },
     ),
+  },
+  'hash-table-insert': {
+    visualization: 'hash-table',
+    snapshot: createHashTableSnapshot(createHashTableState(SAMPLE_HASH_TABLE), {
+      hashComputation: createHashComputation('emu', SAMPLE_HASH_TABLE.bucketCount),
+      hashedKey: 'emu',
+      hashValue: 7,
+      activeBucketIndex: 7,
+      targetKey: 'emu',
+      targetValue: '5',
+      collision: true,
+      highlightedEntryIds: ['bat', 'rat'],
+      phase: 'traverse',
+      operationStatus: 'scanning-chain',
+    }),
+  },
+  'hash-table-search': {
+    visualization: 'hash-table',
+    snapshot: createHashTableSnapshot(createHashTableState(SAMPLE_HASH_TABLE), {
+      hashComputation: createHashComputation('owl', SAMPLE_HASH_TABLE.bucketCount),
+      hashedKey: 'owl',
+      hashValue: 2,
+      activeBucketIndex: 2,
+      activeEntryId: 'owl',
+      targetKey: 'owl',
+      comparedEntryIds: ['owl'],
+      visitedEntryIds: ['dog'],
+      foundEntryId: 'owl',
+      collision: true,
+      phase: 'compare',
+      operationStatus: 'comparing',
+      searchResult: 'found',
+    }),
+  },
+  'hash-table-delete': {
+    visualization: 'hash-table',
+    snapshot: createHashTableSnapshot(createHashTableState(SAMPLE_HASH_TABLE), {
+      hashComputation: createHashComputation('owl', SAMPLE_HASH_TABLE.bucketCount),
+      hashedKey: 'owl',
+      hashValue: 2,
+      activeBucketIndex: 2,
+      activeEntryId: 'owl',
+      targetKey: 'owl',
+      deletingEntryId: 'owl',
+      comparedEntryIds: ['owl'],
+      visitedEntryIds: ['dog'],
+      collision: true,
+      phase: 'mutate',
+      operationStatus: 'deleting',
+      searchResult: 'found',
+    }),
   },
 }

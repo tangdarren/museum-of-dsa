@@ -1,10 +1,13 @@
 import { Canvas } from '@react-three/fiber'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getAlgorithmSteps,
   getLinkedListVariantForAlgorithm,
+  isHashTableAlgorithm,
   isLinkedListAlgorithm,
   isSortingCategory,
+  usesHashTableInsert,
+  usesHashTableSearch,
   usesLinkedListDelete,
   usesLinkedListInsert,
   usesLinkedListSearch,
@@ -12,6 +15,10 @@ import {
   usesTargetNodeSelection,
   usesTreeTargetSelection,
 } from './algorithms/getAlgorithmSteps'
+import {
+  hashTableDataFromSnapshot,
+  hashTableFingerprint,
+} from './algorithms/hashTableShared'
 import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
 import AlgorithmGalleryUi from './components/museum/AlgorithmGalleryUi'
@@ -24,8 +31,17 @@ import {
   getAlgorithmById,
   getGalleryEntries,
 } from './data/algorithms'
+import { getHashTableExhibitPrimer } from './data/hashTableOperations'
 import { getLinkedListExhibitPrimer } from './data/linkedListOperations'
 import { SAMPLE_GRAPH } from './data/sampleGraph'
+import {
+  createDefaultHashTable,
+  DEFAULT_HASH_TABLE_DELETE_KEY,
+  DEFAULT_HASH_TABLE_INSERT_PAIR,
+  DEFAULT_HASH_TABLE_SEARCH_KEY,
+  getHashTableSearchKeyGroups,
+  normalizeHashTableInput,
+} from './data/sampleHashTable'
 import {
   createDefaultSortingValues,
   createRandomSortingValues,
@@ -55,6 +71,7 @@ import {
 } from './navigation/destinations'
 import MuseumScene from './scenes/MuseumScene'
 import type { AlgorithmCategory, AlgorithmId } from './types/algorithm'
+import type { HashTableData } from './types/hashTable'
 import type { LinkedListMutationPosition } from './types/linkedList'
 
 type AlgorithmViewPhase = 'transitioning' | 'overview' | 'gallery' | 'focused'
@@ -91,6 +108,16 @@ function App() {
     useState<LinkedListMutationPosition>(DEFAULT_LINKED_LIST_INSERT_POSITION)
   const [linkedListDeletePosition, setLinkedListDeletePosition] =
     useState<LinkedListMutationPosition>(DEFAULT_LINKED_LIST_DELETE_POSITION)
+  const [hashTable, setHashTable] = useState<HashTableData>(
+    createDefaultHashTable,
+  )
+  const [hashKeyInput, setHashKeyInput] = useState(
+    DEFAULT_HASH_TABLE_INSERT_PAIR.key,
+  )
+  const [hashValueInput, setHashValueInput] = useState(
+    DEFAULT_HASH_TABLE_INSERT_PAIR.value,
+  )
+  const pendingHashTable = useRef<HashTableData | null>(null)
   const treeSearchTargets = useMemo(
     () => getTreeSearchTargetGroups(SAMPLE_TREE),
     [],
@@ -153,6 +180,25 @@ function App() {
   const showingLinkedListDelete = Boolean(
     selectedAlgorithmId && usesLinkedListDelete(selectedAlgorithmId),
   )
+  const showingHashTable = Boolean(
+    selectedAlgorithmId && isHashTableAlgorithm(selectedAlgorithmId),
+  )
+  const showingHashTableInsert = Boolean(
+    selectedAlgorithmId && usesHashTableInsert(selectedAlgorithmId),
+  )
+  const showingHashTableSearch = Boolean(
+    selectedAlgorithmId && usesHashTableSearch(selectedAlgorithmId),
+  )
+  const hashKey = normalizeHashTableInput(hashKeyInput)
+  const hashValue = normalizeHashTableInput(hashValueInput)
+  const hashKeyError =
+    showingHashTable && hashKey.length === 0
+      ? 'Enter a key to run this operation.'
+      : null
+  const hashTableKeys = useMemo(
+    () => getHashTableSearchKeyGroups(hashTable),
+    [hashTable],
+  )
   const steps = useMemo(
     () =>
       selectedAlgorithmId
@@ -169,6 +215,9 @@ function App() {
             insertValue: linkedListInsertValue,
             insertPosition: linkedListInsertPosition,
             deletePosition: linkedListDeletePosition,
+            table: hashTable,
+            hashKey: hashKey.length > 0 ? hashKey : null,
+            hashValue,
           })
         : [],
     [
@@ -183,11 +232,14 @@ function App() {
       linkedListInsertPosition,
       linkedListDeletePosition,
       showingLinkedListSearch,
+      hashTable,
+      hashKey,
+      hashValue,
     ],
   )
   const playback = useAlgorithmPlayback(
     steps,
-    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}:${treeTargetValue}:${linkedList.variant}:${linkedListSearchTarget}:${linkedListInsertValue}:${linkedListMutationPositionKey(linkedListInsertPosition)}:${linkedListMutationPositionKey(linkedListDeletePosition)}`,
+    `${selectedAlgorithmId ?? ''}:${startNodeId ?? ''}:${targetNodeId ?? ''}:${sortingValues.join(',')}:${treeTargetValue}:${linkedList.variant}:${linkedListSearchTarget}:${linkedListInsertValue}:${linkedListMutationPositionKey(linkedListInsertPosition)}:${linkedListMutationPositionKey(linkedListDeletePosition)}:${hashTableFingerprint(hashTable)}:${hashKey}:${hashValue}`,
   )
   const canResetPlayback = Boolean(
     selectedAlgorithmId &&
@@ -217,6 +269,49 @@ function App() {
     setLinkedListDeletePosition(DEFAULT_LINKED_LIST_DELETE_POSITION)
   }, [])
 
+  const resetHashTableInputsFor = useCallback((id: AlgorithmId | null) => {
+    const pending = pendingHashTable.current
+    pendingHashTable.current = null
+
+    if (pending) {
+      setHashTable(pending)
+    }
+
+    if (id === 'hash-table-search') {
+      setHashKeyInput(DEFAULT_HASH_TABLE_SEARCH_KEY)
+      setHashValueInput(DEFAULT_HASH_TABLE_INSERT_PAIR.value)
+      return
+    }
+
+    if (id === 'hash-table-delete') {
+      setHashKeyInput(DEFAULT_HASH_TABLE_DELETE_KEY)
+      setHashValueInput(DEFAULT_HASH_TABLE_INSERT_PAIR.value)
+      return
+    }
+
+    setHashKeyInput(DEFAULT_HASH_TABLE_INSERT_PAIR.key)
+    setHashValueInput(DEFAULT_HASH_TABLE_INSERT_PAIR.value)
+  }, [])
+
+  const resetHashTableExhibit = useCallback(() => {
+    pendingHashTable.current = null
+    setHashTable(createDefaultHashTable())
+    setHashKeyInput(DEFAULT_HASH_TABLE_INSERT_PAIR.key)
+    setHashValueInput(DEFAULT_HASH_TABLE_INSERT_PAIR.value)
+  }, [])
+
+  useEffect(() => {
+    if (!showingHashTable || !playback.isComplete) {
+      return
+    }
+
+    const snapshot = playback.currentStep?.hashTableSnapshot
+
+    if (snapshot) {
+      pendingHashTable.current = hashTableDataFromSnapshot(snapshot)
+    }
+  }, [playback.currentStep, playback.isComplete, showingHashTable])
+
   const goToLocation = useCallback(
     (next: MuseumLocation) => {
       if (isTransitioning) {
@@ -233,11 +328,18 @@ function App() {
       setStartNodeId(null)
       setTargetNodeId(null)
       resetLinkedListInputs()
+      resetHashTableExhibit()
       setSelectorOpen(false)
       setLocation(next)
       setIsTransitioning(true)
     },
-    [isTransitioning, location, resetLinkedListInputs, selectedAlgorithmId],
+    [
+      isTransitioning,
+      location,
+      resetHashTableExhibit,
+      resetLinkedListInputs,
+      selectedAlgorithmId,
+    ],
   )
 
   const handleEnterMuseum = useCallback(() => {
@@ -261,6 +363,7 @@ function App() {
       setStartNodeId(null)
       setTargetNodeId(null)
       resetLinkedListInputs()
+      resetHashTableInputsFor(id)
 
       if (gallery) {
         setSelectedGallery(gallery)
@@ -269,7 +372,7 @@ function App() {
       setSelectedAlgorithmId(id)
       setIsTransitioning(true)
     },
-    [isTransitioning, resetLinkedListInputs],
+    [isTransitioning, resetHashTableInputsFor, resetLinkedListInputs],
   )
 
   const handleSelectGallery = useCallback(
@@ -288,10 +391,17 @@ function App() {
       setStartNodeId(null)
       setTargetNodeId(null)
       resetLinkedListInputs()
+      resetHashTableExhibit()
       setSelectedGallery(category)
       setIsTransitioning(true)
     },
-    [isTransitioning, resetLinkedListInputs, selectedAlgorithmId, selectedGallery],
+    [
+      isTransitioning,
+      resetHashTableExhibit,
+      resetLinkedListInputs,
+      selectedAlgorithmId,
+      selectedGallery,
+    ],
   )
 
   const handleBackToAlgorithms = useCallback(() => {
@@ -304,9 +414,10 @@ function App() {
     setStartNodeId(null)
     setTargetNodeId(null)
     resetLinkedListInputs()
+    resetHashTableExhibit()
     setSelectorOpen(false)
     setIsTransitioning(true)
-  }, [isTransitioning, resetLinkedListInputs])
+  }, [isTransitioning, resetHashTableExhibit, resetLinkedListInputs])
 
   const handleBackToHall = useCallback(() => {
     if (isTransitioning) {
@@ -354,8 +465,21 @@ function App() {
       return
     }
 
+    if (selectedAlgorithmId && isHashTableAlgorithm(selectedAlgorithmId)) {
+      playback.pause()
+      pendingHashTable.current = null
+      resetHashTableInputsFor(selectedAlgorithmId)
+      playback.reset()
+      return
+    }
+
     playback.reset()
-  }, [playback, resetLinkedListInputs, selectedAlgorithmId])
+  }, [
+    playback,
+    resetHashTableInputsFor,
+    resetLinkedListInputs,
+    selectedAlgorithmId,
+  ])
 
   const handleRandomizeArray = useCallback(() => {
     playback.pause()
@@ -429,6 +553,69 @@ function App() {
     },
     [playback],
   )
+
+  const commitPendingHashTable = useCallback(() => {
+    const pending = pendingHashTable.current
+    pendingHashTable.current = null
+
+    if (pending) {
+      setHashTable(pending)
+    }
+  }, [])
+
+  const handleChangeHashKey = useCallback(
+    (value: string) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      commitPendingHashTable()
+      setHashKeyInput(value)
+      playback.reset()
+    },
+    [commitPendingHashTable, playback],
+  )
+
+  const handleChangeHashValue = useCallback(
+    (value: string) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      commitPendingHashTable()
+      setHashValueInput(value)
+      playback.reset()
+    },
+    [commitPendingHashTable, playback],
+  )
+
+  const handleSelectHashKey = useCallback(
+    (key: string, value?: string) => {
+      if (playback.isPlaying) {
+        return
+      }
+
+      playback.pause()
+      commitPendingHashTable()
+      setHashKeyInput(key)
+
+      if (value !== undefined) {
+        setHashValueInput(value)
+      }
+
+      playback.reset()
+    },
+    [commitPendingHashTable, playback],
+  )
+
+  const handleResetHashTable = useCallback(() => {
+    playback.pause()
+    pendingHashTable.current = null
+    setHashTable(createDefaultHashTable())
+    playback.reset()
+  }, [playback])
 
   return (
     <div className="app">
@@ -582,7 +769,10 @@ function App() {
           <div className="algorithm-focused-ui">
             <AlgorithmPlaque
               algorithm={selectedAlgorithm}
-              primer={getLinkedListExhibitPrimer(selectedAlgorithm.category)}
+              primer={
+                getLinkedListExhibitPrimer(selectedAlgorithm.category) ??
+                getHashTableExhibitPrimer(selectedAlgorithm.category)
+              }
             />
             <AlgorithmPlaybackView
               playback={playback}
@@ -652,6 +842,29 @@ function App() {
                               handleSelectLinkedListDeletePosition,
                           }
                         : undefined,
+                    }
+                  : undefined
+              }
+              hashTable={
+                showingHashTable
+                  ? {
+                      mode: showingHashTableInsert
+                        ? 'insert'
+                        : showingHashTableSearch
+                          ? 'search'
+                          : 'delete',
+                      disabled: playback.isPlaying,
+                      hashKey: hashKeyInput,
+                      hashValue: hashValueInput,
+                      presentKeys: hashTableKeys.present,
+                      missingKeys: hashTableKeys.missing,
+                      error: hashKeyError,
+                      snapshot:
+                        playback.currentStep?.hashTableSnapshot ?? null,
+                      onChangeKey: handleChangeHashKey,
+                      onChangeValue: handleChangeHashValue,
+                      onSelectKey: handleSelectHashKey,
+                      onResetTable: handleResetHashTable,
                     }
                   : undefined
               }

@@ -1,7 +1,13 @@
 import type { AlgorithmPlayback } from '../../hooks/useAlgorithmPlayback'
 import type { AlgorithmId } from '../../types/algorithm'
+import type { AlgorithmHashTableSnapshot } from '../../types/algorithmStep'
 import type { SortingMetrics } from '../../types/sorting'
 import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
+import HashTableControls, {
+  type HashTableControlMode,
+} from './HashTableControls'
+import HashTableExplainPanel from './HashTableExplainPanel'
+import HashTableLegend from './HashTableLegend'
 import LinkedListControls, {
   type LinkedListControlMode,
   type LinkedListDeleteControls,
@@ -35,6 +41,21 @@ export type LinkedListPlaybackExtras = {
   delete?: LinkedListDeleteControls
 }
 
+export type HashTablePlaybackExtras = {
+  mode: HashTableControlMode
+  disabled?: boolean
+  hashKey: string
+  hashValue: string
+  presentKeys: string[]
+  missingKeys: string[]
+  error?: string | null
+  snapshot: AlgorithmHashTableSnapshot | null
+  onChangeKey: (value: string) => void
+  onChangeValue: (value: string) => void
+  onSelectKey: (key: string, value?: string) => void
+  onResetTable: () => void
+}
+
 type AlgorithmPlaybackViewProps = {
   playback: AlgorithmPlayback
   disabled?: boolean
@@ -44,6 +65,7 @@ type AlgorithmPlaybackViewProps = {
   sorting?: SortingPlaybackExtras
   treeSearch?: TreeSearchPlaybackExtras
   linkedList?: LinkedListPlaybackExtras
+  hashTable?: HashTablePlaybackExtras
 }
 
 function AlgorithmPlaybackView({
@@ -55,6 +77,7 @@ function AlgorithmPlaybackView({
   sorting,
   treeSearch,
   linkedList,
+  hashTable,
 }: AlgorithmPlaybackViewProps) {
   const auxiliary = playback.currentStep?.auxiliaryData
   const metrics = playback.currentStep?.metrics
@@ -74,29 +97,51 @@ function AlgorithmPlaybackView({
     Boolean(playback.currentStep?.treeSnapshot)
   const isLinkedListSearchComplete =
     playback.isComplete && Boolean(pathResult) && Boolean(linkedListSnapshot)
+  const hashTableSnapshot =
+    hashTable?.snapshot ?? playback.currentStep?.hashTableSnapshot ?? null
+  const isHashTableComplete =
+    Boolean(hashTable) &&
+    playback.isComplete &&
+    Boolean(hashTableSnapshot)
+  const hashTableStepLabel =
+    hashTable && isHashTableComplete
+      ? hashTable.mode === 'insert'
+        ? pathResult?.found
+          ? 'Key updated'
+          : 'Key inserted'
+        : hashTable.mode === 'delete'
+          ? pathResult?.found
+            ? 'Key deleted'
+            : 'Key not found'
+          : pathResult?.found
+            ? 'Key found'
+            : 'Key not found'
+      : null
   const isTraversalComplete =
     playback.isComplete && Boolean(traversalOrder && traversalOrder.length > 0)
   const isSortingComplete =
     Boolean(sorting) && playback.isComplete && Boolean(sorting?.sortedValues)
-  const stepLabel = selectionPrompt === 'start'
-    ? 'Select a start node'
-    : selectionPrompt === 'target'
-      ? 'Select a target node'
-      : isPathComplete
-        ? pathResult?.found
-          ? 'Path found'
-          : 'No path found'
-        : isTreeSearchComplete || isLinkedListSearchComplete
+  const stepLabel = hashTableStepLabel
+    ? hashTableStepLabel
+    : selectionPrompt === 'start'
+      ? 'Select a start node'
+      : selectionPrompt === 'target'
+        ? 'Select a target node'
+        : isPathComplete
           ? pathResult?.found
-            ? 'Value found'
-            : 'Value not found'
-          : isTraversalComplete
-            ? 'Traversal complete'
-            : isSortingComplete
-              ? 'Array sorted'
-              : playback.stepCount === 0
-                ? 'No steps'
-                : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
+            ? 'Path found'
+            : 'No path found'
+          : isTreeSearchComplete || isLinkedListSearchComplete
+            ? pathResult?.found
+              ? 'Value found'
+              : 'Value not found'
+            : isTraversalComplete
+              ? 'Traversal complete'
+              : isSortingComplete
+                ? 'Array sorted'
+                : playback.stepCount === 0
+                  ? 'No steps'
+                  : `Step ${playback.currentStepIndex + 1} of ${playback.stepCount}`
   const description = selectionPrompt === 'start'
     ? 'Select any node to begin.'
     : selectionPrompt === 'target'
@@ -109,6 +154,16 @@ function AlgorithmPlaybackView({
       <p className="algorithm-playback-description" aria-live="polite">
         {description}
       </p>
+      {hashTable ? (
+        <>
+          <HashTableExplainPanel
+            snapshot={hashTableSnapshot}
+            description={playback.currentStep?.description}
+            inspection={inspection}
+          />
+          <HashTableLegend />
+        </>
+      ) : null}
       {isPathComplete && pathResult?.found ? (
         <div className="algorithm-playback-summary">
           <p className="algorithm-playback-order">{pathResult.nodes.join(' → ')}</p>
@@ -174,7 +229,7 @@ function AlgorithmPlaybackView({
           {sorting.sortedValues.join(' → ')}
         </p>
       ) : null}
-      {inspection ? (
+      {inspection && !hashTable ? (
         <div className="algorithm-playback-inspection">
           <p className="algorithm-playback-auxiliary-label">{inspection.title}</p>
           {inspection.lines.map((line) => (
@@ -275,6 +330,25 @@ function AlgorithmPlaybackView({
           search={linkedList.search}
           insert={linkedList.insert}
           delete={linkedList.delete}
+        />
+      ) : null}
+      {hashTable ? (
+        <HashTableControls
+          disabled={hashTable.disabled ?? disabled}
+          mode={hashTable.mode}
+          entryKey={hashTable.hashKey}
+          entryValue={hashTable.hashValue}
+          keyError={hashTable.error}
+          presentKeys={hashTable.presentKeys}
+          missingKeys={hashTable.missingKeys}
+          onKeyChange={hashTable.onChangeKey}
+          onValueChange={hashTable.onChangeValue}
+          onSelectInsertPair={
+            hashTable.mode === 'insert'
+              ? (pair) => hashTable.onSelectKey(pair.key, pair.value)
+              : undefined
+          }
+          onResetTable={hashTable.onResetTable}
         />
       ) : null}
     </section>

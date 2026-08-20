@@ -11,6 +11,13 @@ export type HashTableCaptionContent = {
 
 function titleForSnapshot(snapshot: AlgorithmHashTableSnapshot): string {
   if (
+    (snapshot.operationStatus === 'idle' || !snapshot.operationStatus) &&
+    !snapshot.phase
+  ) {
+    return 'Separate chaining'
+  }
+
+  if (
     snapshot.operationStatus === 'comparing' ||
     snapshot.phase === 'compare'
   ) {

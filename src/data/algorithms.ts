@@ -4,9 +4,10 @@ import type {
   AlgorithmDefinition,
   AlgorithmId,
   AlgorithmRoomCategory,
+  DataStructureCategory,
   FutureAlgorithmDefinition,
-  LinkedListCategory,
 } from '../types/algorithm'
+import { HASH_TABLE_OPERATIONS } from './hashTableOperations'
 import { LINKED_LIST_OPERATIONS } from './linkedListOperations'
 
 export const ALGORITHMS: AlgorithmDefinition[] = [
@@ -119,6 +120,7 @@ export const ALGORITHMS: AlgorithmDefinition[] = [
     available: true,
   },
   ...LINKED_LIST_OPERATIONS,
+  ...HASH_TABLE_OPERATIONS,
 ]
 
 export const FUTURE_TREE_ALGORITHMS: FutureAlgorithmDefinition[] = [
@@ -157,7 +159,7 @@ export const ALGORITHM_SECTIONS: {
 ]
 
 export const DATA_STRUCTURE_SECTIONS: {
-  category: LinkedListCategory
+  category: DataStructureCategory
   entries: AlgorithmCatalogEntry[]
 }[] = [
   {
@@ -171,6 +173,10 @@ export const DATA_STRUCTURE_SECTIONS: {
     entries: ALGORITHMS.filter(
       (algorithm) => algorithm.category === 'Doubly Linked List',
     ),
+  },
+  {
+    category: 'Hash Table',
+    entries: ALGORITHMS.filter((algorithm) => algorithm.category === 'Hash Table'),
   },
 ]
 

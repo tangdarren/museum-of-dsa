@@ -20,6 +20,9 @@ export type AlgorithmId =
   | 'doubly-linked-list-search'
   | 'doubly-linked-list-insert'
   | 'doubly-linked-list-delete'
+  | 'hash-table-insert'
+  | 'hash-table-search'
+  | 'hash-table-delete'
 
 export type FutureAlgorithmId = 'bst-insert'
 
@@ -31,7 +34,11 @@ export type AlgorithmRoomCategory =
 
 export type LinkedListCategory = 'Singly Linked List' | 'Doubly Linked List'
 
-export type AlgorithmCategory = AlgorithmRoomCategory | LinkedListCategory
+export type HashTableCategory = 'Hash Table'
+
+export type DataStructureCategory = LinkedListCategory | HashTableCategory
+
+export type AlgorithmCategory = AlgorithmRoomCategory | DataStructureCategory
 
 export type AlgorithmComplexity = {
   time: string
@@ -82,4 +89,16 @@ export function isLinkedListCategory(
   return (
     category === 'Singly Linked List' || category === 'Doubly Linked List'
   )
+}
+
+export function isHashTableCategory(
+  category: AlgorithmCategory,
+): category is HashTableCategory {
+  return category === 'Hash Table'
+}
+
+export function isDataStructureCategory(
+  category: AlgorithmCategory,
+): category is DataStructureCategory {
+  return isLinkedListCategory(category) || isHashTableCategory(category)
 }

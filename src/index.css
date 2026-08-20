@@ -893,6 +893,74 @@ body {
   gap: 0.45rem;
 }
 
+.hash-table-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.15rem 0 0;
+}
+
+.hash-table-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 16rem;
+}
+
+.hash-table-field .algorithm-playback-speed-label {
+  flex: 0 0 2.6rem;
+  text-align: left;
+}
+
+.hash-table-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--bronze);
+  background: var(--slate-deep);
+  color: var(--cream);
+  font-family: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+
+.hash-table-input:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.hash-table-input:disabled {
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.hash-table-input.is-invalid {
+  border-color: #c45c42;
+}
+
+.hash-table-error {
+  margin: 0;
+  color: #e0906f;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.hash-table-buttons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.hash-table-controls-note {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
 @media (max-width: 1200px) {
   .algorithm-gallery-ui {
     top: auto;

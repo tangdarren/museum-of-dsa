@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import type { MeshStandardMaterial, SpotLight } from 'three'
 import { mapAlgorithmStepToGraph } from '../algorithms/mapAlgorithmStepToGraph'
 import {
+  isHashTableCategory,
   isLinkedListCategory,
   isSortingCategory,
   isTreesCategory,
@@ -14,11 +15,13 @@ import { ALGORITHM_INSTALLATION_POSITION, type Vec3 } from '../../navigation/des
 import { museum } from '../../theme/palette'
 import type { AlgorithmDefinition } from '../../types/algorithm'
 import type {
+  AlgorithmHashTableSnapshot,
   AlgorithmLinkedListSnapshot,
   AlgorithmStep,
 } from '../../types/algorithmStep'
 import type { GraphNodeStates } from '../../types/graph'
 import GraphVisualization from '../visualizations/graph/GraphVisualization'
+import HashTableVisualization from '../visualizations/hashTable/HashTableVisualization'
 import LinkedListVisualization from '../visualizations/linkedList/LinkedListVisualization'
 import SortVisualization from '../visualizations/sorting/SortVisualization'
 import TreeVisualization from '../visualizations/tree/TreeVisualization'
@@ -36,6 +39,7 @@ type AlgorithmInstallationProps = {
   emptyTitle?: string
   emptySubtitle?: string
   idleLinkedListSnapshot?: AlgorithmLinkedListSnapshot | null
+  idleHashTableSnapshot?: AlgorithmHashTableSnapshot | null
 }
 
 function prefersReducedMotion() {
@@ -54,8 +58,10 @@ function AlgorithmInstallation({
   emptyTitle = 'ALGORITHMS',
   emptySubtitle = 'Explore how computers solve problems step by step.',
   idleLinkedListSnapshot = null,
+  idleHashTableSnapshot = null,
 }: AlgorithmInstallationProps) {
   const displayed = algorithm ?? preview
+  const idleSnapshot = idleLinkedListSnapshot ?? idleHashTableSnapshot
   const inspection = algorithm !== null
   const previewing = preview !== null && algorithm === null
   const previewConfig = preview && !algorithm ? ALGORITHM_PREVIEWS[preview.id] : null
@@ -64,6 +70,9 @@ function AlgorithmInstallation({
   const showingLinkedList = displayed
     ? isLinkedListCategory(displayed.category)
     : Boolean(idleLinkedListSnapshot)
+  const showingHashTable = displayed
+    ? isHashTableCategory(displayed.category)
+    : Boolean(idleHashTableSnapshot)
   const playbackGraph = mapAlgorithmStepToGraph(playbackStep)
   const graphPreview =
     previewConfig?.visualization === 'graph' ? previewConfig : null
@@ -87,6 +96,13 @@ function AlgorithmInstallation({
       : previewConfig?.visualization === 'linked-list'
         ? previewConfig.snapshot
         : (idleLinkedListSnapshot ?? null)
+    : null
+  const hashTableSnapshot = showingHashTable
+    ? algorithm
+      ? (playbackStep?.hashTableSnapshot ?? null)
+      : previewConfig?.visualization === 'hash-table'
+        ? previewConfig.snapshot
+        : (idleHashTableSnapshot ?? null)
     : null
   const graphStates = algorithm
     ? playbackStep
@@ -336,10 +352,10 @@ function AlgorithmInstallation({
       </Text>
 
       <group position={[0, 3.2, 0.22]} scale={[4.6, 2.5, 1]}>
-        <AmbientComputationField visible={!displayed && !idleLinkedListSnapshot} />
+        <AmbientComputationField visible={!displayed && !idleSnapshot} />
       </group>
 
-      {displayed || idleLinkedListSnapshot ? (
+      {displayed || idleSnapshot ? (
         <group>
           <Text
             position={[0, 5.12, 0.22]}
@@ -417,6 +433,10 @@ function AlgorithmInstallation({
           ) : showingLinkedList ? (
             <group position={[0, 2.88, 0.36]} scale={4.15}>
               <LinkedListVisualization snapshot={linkedListSnapshot} />
+            </group>
+          ) : showingHashTable ? (
+            <group position={[0, 2.98, 0.36]} scale={4.2}>
+              <HashTableVisualization snapshot={hashTableSnapshot} />
             </group>
           ) : (
             <group

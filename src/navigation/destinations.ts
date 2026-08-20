@@ -2,11 +2,11 @@ import type {
   AlgorithmCategory,
   AlgorithmId,
   AlgorithmRoomCategory,
-  LinkedListCategory,
+  DataStructureCategory,
 } from '../types/algorithm'
 import {
   isAlgorithmRoomCategory,
-  isLinkedListCategory,
+  isDataStructureCategory,
 } from '../types/algorithm'
 
 export type Vec3 = [number, number, number]
@@ -207,7 +207,7 @@ export const ALGORITHM_GALLERY_DESTINATIONS: Record<
 }
 
 export const DATA_STRUCTURE_GALLERY_PLACEMENTS: Record<
-  LinkedListCategory,
+  DataStructureCategory,
   AlgorithmGalleryPlacement
 > = {
   'Singly Linked List': {
@@ -220,10 +220,15 @@ export const DATA_STRUCTURE_GALLERY_PLACEMENTS: Record<
     position: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
     rotation: [0, -Math.PI / 2, 0],
   },
+  'Hash Table': {
+    side: 'left',
+    position: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
+    rotation: [0, Math.PI / 2, 0],
+  },
 }
 
 export const DATA_STRUCTURE_GALLERY_DESTINATIONS: Record<
-  LinkedListCategory,
+  DataStructureCategory,
   MuseumDestination
 > = {
   'Singly Linked List': {
@@ -243,6 +248,15 @@ export const DATA_STRUCTURE_GALLERY_DESTINATIONS: Record<
       GALLERY_FRONT_Z,
     ],
     lookAt: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
+  },
+  'Hash Table': {
+    id: 'gallery-hash-table',
+    cameraPosition: [
+      galleryCameraX('left', DATA_STRUCTURES_CENTER_X),
+      3.22,
+      GALLERY_BACK_Z,
+    ],
+    lookAt: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
   },
 }
 
@@ -270,7 +284,7 @@ export function getMuseumDestination(
   if (
     location === 'data-structures' &&
     selectedGallery &&
-    isLinkedListCategory(selectedGallery)
+    isDataStructureCategory(selectedGallery)
   ) {
     return DATA_STRUCTURE_GALLERY_DESTINATIONS[selectedGallery]
   }

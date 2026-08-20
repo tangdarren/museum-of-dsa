@@ -64,6 +64,32 @@ export function copyHashTableBuckets(
   return buckets.map(copyHashTableBucket)
 }
 
+export function copyHashTableData(table: HashTableData): HashTableData {
+  return {
+    bucketCount: table.bucketCount,
+    buckets: copyHashTableBuckets(table.buckets),
+    entries: copyHashTableEntries(table.entries),
+  }
+}
+
+export function hashTableDataFromSnapshot(
+  snapshot: AlgorithmHashTableSnapshot,
+): HashTableData {
+  return {
+    bucketCount: snapshot.bucketCount,
+    buckets: copyHashTableBuckets(snapshot.buckets),
+    entries: copyHashTableEntries(snapshot.entries),
+  }
+}
+
+export function hashTableFingerprint(table: HashTableData): string {
+  return table.entries
+    .map(
+      (entry) => `${entry.id}:${entry.key}:${entry.value}:${entry.nextId ?? ''}`,
+    )
+    .join('|')
+}
+
 export function copyHashComputation(
   computation: HashComputation,
 ): HashComputation {

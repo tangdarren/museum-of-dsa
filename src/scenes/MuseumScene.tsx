@@ -12,10 +12,11 @@ import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
 import ExhibitHall from '../components/museum/ExhibitHall'
 import MuseumSign from '../components/museum/MuseumSign'
 import { ALGORITHM_SECTIONS, DATA_STRUCTURE_SECTIONS } from '../data/algorithms'
+import { createIdleHashTableSnapshot, SAMPLE_HASH_TABLE } from '../data/sampleHashTable'
 import { createSampleLinkedListSnapshot, SAMPLE_DOUBLY_LINKED_LIST, SAMPLE_LINKED_LIST } from '../data/sampleLinkedList'
 import { museum } from '../theme/palette'
 import type { AlgorithmCategory, AlgorithmDefinition, AlgorithmId } from '../types/algorithm'
-import { isAlgorithmRoomCategory, isLinkedListCategory } from '../types/algorithm'
+import { isAlgorithmRoomCategory, isDataStructureCategory, isHashTableCategory } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphNodeStates } from '../types/graph'
 import {
@@ -43,6 +44,7 @@ const IDLE_SINGLY_LINKED_LIST_SNAPSHOT =
 const IDLE_DOUBLY_LINKED_LIST_SNAPSHOT = createSampleLinkedListSnapshot(
   SAMPLE_DOUBLY_LINKED_LIST,
 )
+const IDLE_HASH_TABLE_SNAPSHOT = createIdleHashTableSnapshot(SAMPLE_HASH_TABLE)
 
 const COLUMNS: [number, number, number][] = [
   [-7.2, ROOM_HEIGHT / 2, -8.5],
@@ -417,13 +419,19 @@ function MuseumScene({
       ? previewAlgorithm
       : null
   const dataStructureAlgorithm =
-    selectedAlgorithm && isLinkedListCategory(selectedAlgorithm.category)
+    selectedAlgorithm && isDataStructureCategory(selectedAlgorithm.category)
       ? selectedAlgorithm
       : null
   const dataStructurePreview =
-    previewAlgorithm && isLinkedListCategory(previewAlgorithm.category)
+    previewAlgorithm && isDataStructureCategory(previewAlgorithm.category)
       ? previewAlgorithm
       : null
+  const showingHashTableExhibit =
+    (selectedGallery !== null && isHashTableCategory(selectedGallery)) ||
+    (dataStructureAlgorithm !== null &&
+      isHashTableCategory(dataStructureAlgorithm.category)) ||
+    (dataStructurePreview !== null &&
+      isHashTableCategory(dataStructurePreview.category))
   const inspection = selectedAlgorithm !== null
   const ambientRef = useRef<AmbientLight>(null)
   const hemisphereRef = useRef<HemisphereLight>(null)
@@ -794,13 +802,18 @@ function MuseumScene({
 
       <AlgorithmInstallation
         position={DATA_STRUCTURE_INSTALLATION_POSITION}
-        plateLabel="LINKED LISTS"
-        emptyTitle="LINKED LISTS"
+        plateLabel={showingHashTableExhibit ? 'HASH TABLES' : 'LINKED LISTS'}
+        emptyTitle={showingHashTableExhibit ? 'HASH TABLES' : 'LINKED LISTS'}
         emptySubtitle="Data Structures"
         idleLinkedListSnapshot={
-          selectedGallery === 'Doubly Linked List'
-            ? IDLE_DOUBLY_LINKED_LIST_SNAPSHOT
-            : IDLE_SINGLY_LINKED_LIST_SNAPSHOT
+          showingHashTableExhibit
+            ? null
+            : selectedGallery === 'Doubly Linked List'
+              ? IDLE_DOUBLY_LINKED_LIST_SNAPSHOT
+              : IDLE_SINGLY_LINKED_LIST_SNAPSHOT
+        }
+        idleHashTableSnapshot={
+          showingHashTableExhibit ? IDLE_HASH_TABLE_SNAPSHOT : null
         }
         algorithm={location === 'data-structures' ? dataStructureAlgorithm : null}
         preview={location === 'data-structures' ? dataStructurePreview : null}
