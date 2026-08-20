@@ -21,7 +21,7 @@ export type HashTableData = {
   entries: HashTableEntry[]
 }
 
-export type HashTableBucketState = 'default' | 'active' | 'hashed'
+export type HashTableBucketState = 'default' | 'active' | 'hashed' | 'collision'
 
 export type HashTableEntryState =
   | 'default'
@@ -36,6 +36,9 @@ export type HashTableEntryState =
 
 export type HashTableBucketStates = Partial<Record<number, HashTableBucketState>>
 export type HashTableEntryStates = Partial<Record<string, HashTableEntryState>>
+
+export type HashTableLinkState = 'default' | 'active'
+export type HashTableLinkStates = Partial<Record<string, HashTableLinkState>>
 
 export type HashTableOperationId =
   | 'hash-table-insert'

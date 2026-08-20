@@ -207,3 +207,55 @@ export const linkedListLinkStyle = {
     radius: 0.011,
   },
 } as const
+
+export const hashTableBucketStyle = {
+  default: {
+    color: '#3a4248',
+    emissive: '#1c2428',
+    emissiveIntensity: 0.06,
+    roughness: 0.58,
+    metalness: 0.16,
+    scale: 1,
+  },
+  hashed: {
+    color: '#3d9a94',
+    emissive: '#2a7a76',
+    emissiveIntensity: 0.3,
+    roughness: 0.3,
+    metalness: 0.28,
+    scale: 1.04,
+  },
+  active: {
+    color: '#e0b04a',
+    emissive: '#d4a040',
+    emissiveIntensity: 0.42,
+    roughness: 0.22,
+    metalness: 0.52,
+    scale: 1.08,
+  },
+  collision: {
+    color: '#c45c42',
+    emissive: '#a44832',
+    emissiveIntensity: 0.36,
+    roughness: 0.26,
+    metalness: 0.4,
+    scale: 1.08,
+  },
+} as const
+
+export const hashTableEntryStyle = {
+  default: linkedListNodeStyle.default,
+  active: linkedListNodeStyle.active,
+  visited: linkedListNodeStyle.visited,
+  found: linkedListNodeStyle.found,
+  target: linkedListNodeStyle.target,
+  highlighted: linkedListNodeStyle.highlighted,
+  compared: linkedListNodeStyle.highlighted,
+  inserting: linkedListNodeStyle.inserting,
+  deleting: linkedListNodeStyle.deleting,
+} as const
+
+export const hashTableLinkStyle = {
+  default: linkedListLinkStyle.next,
+  active: linkedListLinkStyle.active,
+} as const
