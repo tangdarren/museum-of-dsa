@@ -26,6 +26,7 @@ export type HashTableSnapshotHighlights = {
   foundEntryId?: string
   insertingEntryId?: string
   deletingEntryId?: string
+  collision?: boolean
   operationStatus?: AlgorithmHashTableSnapshot['operationStatus']
   phase?: AlgorithmHashTableSnapshot['phase']
   searchResult?: AlgorithmHashTableSnapshot['searchResult']
@@ -226,13 +227,17 @@ export function getHashTableBucketEntryOrder(
   return order
 }
 
+export function hashTableEntryLabel(entry: HashTableEntry): string {
+  return `${entry.key}:${entry.value}`
+}
+
 export function getHashTableEntryLabels(
   entryIds: readonly string[],
   entriesById: Map<string, HashTableEntry>,
 ): string[] {
   return entryIds.map((id) => {
     const entry = entriesById.get(id)
-    return entry ? `${entry.key}:${entry.value}` : id
+    return entry ? hashTableEntryLabel(entry) : id
   })
 }
 
@@ -320,6 +325,77 @@ export function setHashTableNext(
   }
 }
 
+export function appendHashTableEntry(
+  table: HashTableData,
+  key: string,
+  value: string,
+): HashTableEntry {
+  const entry = createHashTableEntry(
+    createUniqueHashTableEntryId(table.entries, key),
+    key,
+    value,
+  )
+  const bucketIndex = hashStringKey(key, table.bucketCount)
+  const order = getHashTableBucketEntryOrder(table, bucketIndex)
+
+  if (order.length === 0) {
+    const bucket = getHashTableBucket(table, bucketIndex)
+
+    if (bucket) {
+      bucket.headId = entry.id
+    }
+  } else {
+    const tail = table.entries.find((item) => item.id === order[order.length - 1])
+
+    if (tail) {
+      setHashTableNext(tail, entry.id)
+    }
+  }
+
+  table.entries.push(entry)
+  return entry
+}
+
+export function unlinkHashTableEntry(
+  table: HashTableData,
+  bucketIndex: number,
+  entryId: string,
+) {
+  const order = getHashTableBucketEntryOrder(table, bucketIndex)
+  const index = order.indexOf(entryId)
+
+  if (index < 0) {
+    return
+  }
+
+  const entriesById = indexHashTableEntries(table.entries)
+  const target = entriesById.get(entryId)
+
+  if (!target) {
+    return
+  }
+
+  const successorId = target.nextId
+  const predecessor =
+    index > 0 ? entriesById.get(order[index - 1]) : undefined
+
+  if (predecessor) {
+    setHashTableNext(predecessor, successorId)
+  } else {
+    const bucket = getHashTableBucket(table, bucketIndex)
+
+    if (bucket) {
+      bucket.headId = successorId ?? null
+    }
+  }
+
+  setHashTableNext(target, undefined)
+}
+
+export function dropHashTableEntry(table: HashTableData, entryId: string) {
+  table.entries = table.entries.filter((entry) => entry.id !== entryId)
+}
+
 export function createHashTableFromPairs(
   bucketCount: number,
   pairs: readonly HashTablePair[],
@@ -334,31 +410,7 @@ export function createHashTableFromPairs(
       continue
     }
 
-    const entry = createHashTableEntry(
-      createUniqueHashTableEntryId(table.entries, pair.key),
-      pair.key,
-      pair.value,
-    )
-    const bucketIndex = hashStringKey(pair.key, table.bucketCount)
-    const order = getHashTableBucketEntryOrder(table, bucketIndex)
-
-    if (order.length === 0) {
-      const bucket = table.buckets[bucketIndex]
-
-      if (bucket) {
-        bucket.headId = entry.id
-      }
-    } else {
-      const tail = table.entries.find(
-        (item) => item.id === order[order.length - 1],
-      )
-
-      if (tail) {
-        setHashTableNext(tail, entry.id)
-      }
-    }
-
-    table.entries.push(entry)
+    appendHashTableEntry(table, pair.key, pair.value)
   }
 
   return table
@@ -387,6 +439,7 @@ export function copyHashTableSnapshot(
     foundEntryId: snapshot.foundEntryId,
     insertingEntryId: snapshot.insertingEntryId,
     deletingEntryId: snapshot.deletingEntryId,
+    collision: snapshot.collision,
     operationStatus: snapshot.operationStatus,
     phase: snapshot.phase,
     searchResult: snapshot.searchResult,
@@ -419,6 +472,7 @@ export function createHashTableSnapshot(
     foundEntryId: highlights.foundEntryId,
     insertingEntryId: highlights.insertingEntryId,
     deletingEntryId: highlights.deletingEntryId,
+    collision: highlights.collision,
     operationStatus: highlights.operationStatus ?? state.operationStatus,
     phase: highlights.phase,
     searchResult: highlights.searchResult,

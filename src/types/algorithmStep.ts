@@ -131,6 +131,7 @@ export type AlgorithmHashTableSnapshot = {
   foundEntryId?: string
   insertingEntryId?: string
   deletingEntryId?: string
+  collision?: boolean
   operationStatus?: HashTableOperationStatus
   phase?: HashTableOperationPhase
   searchResult?: 'found' | 'not-found'
