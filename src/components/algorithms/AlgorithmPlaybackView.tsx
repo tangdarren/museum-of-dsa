@@ -6,8 +6,6 @@ import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
 import HashTableControls, {
   type HashTableControlMode,
 } from './HashTableControls'
-import HashTableExplainPanel from './HashTableExplainPanel'
-import HashTableLegend from './HashTableLegend'
 import LinkedListControls, {
   type LinkedListControlMode,
   type LinkedListDeleteControls,
@@ -154,16 +152,6 @@ function AlgorithmPlaybackView({
       <p className="algorithm-playback-description" aria-live="polite">
         {description}
       </p>
-      {hashTable ? (
-        <>
-          <HashTableExplainPanel
-            snapshot={hashTableSnapshot}
-            description={playback.currentStep?.description}
-            inspection={inspection}
-          />
-          <HashTableLegend />
-        </>
-      ) : null}
       {isPathComplete && pathResult?.found ? (
         <div className="algorithm-playback-summary">
           <p className="algorithm-playback-order">{pathResult.nodes.join(' → ')}</p>

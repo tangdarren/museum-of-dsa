@@ -44,8 +44,14 @@ export const ALGORITHMS_ROOM_DEPTH = 14
 export const FRONT_BACK = -ROOM_DEPTH / 2
 export const LOBBY_CENTER_Z = FRONT_BACK - LOBBY_DEPTH / 2
 export const LOBBY_BACK = FRONT_BACK - LOBBY_DEPTH
-export const ALGORITHMS_CENTER_X = LOBBY_DOOR_OFFSET
-export const DATA_STRUCTURES_CENTER_X = -LOBBY_DOOR_OFFSET
+// Each hall is ALGORITHMS_ROOM_WIDTH wide, so the centers have to sit at least a
+// half width plus a wall apart. Any closer and one hall's side wall stands inside
+// the other, clipping its installation and hiding its wall panels.
+export const EXHIBIT_HALL_GAP = WALL_THICKNESS
+export const EXHIBIT_HALL_CENTER_OFFSET =
+  ALGORITHMS_ROOM_WIDTH / 2 + WALL_THICKNESS + EXHIBIT_HALL_GAP / 2
+export const ALGORITHMS_CENTER_X = EXHIBIT_HALL_CENTER_OFFSET
+export const DATA_STRUCTURES_CENTER_X = -EXHIBIT_HALL_CENTER_OFFSET
 export const ALGORITHMS_CENTER_Z = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH / 2
 export const ALGORITHMS_BACK = LOBBY_BACK - ALGORITHMS_ROOM_DEPTH
 

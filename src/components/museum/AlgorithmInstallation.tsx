@@ -435,7 +435,7 @@ function AlgorithmInstallation({
               <LinkedListVisualization snapshot={linkedListSnapshot} />
             </group>
           ) : showingHashTable ? (
-            <group position={[0, 2.98, 0.36]} scale={4.2}>
+            <group position={[0, 2.95, 0.36]} scale={3.9}>
               <HashTableVisualization snapshot={hashTableSnapshot} />
             </group>
           ) : (

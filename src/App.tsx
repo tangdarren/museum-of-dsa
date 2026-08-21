@@ -21,6 +21,8 @@ import {
 } from './algorithms/hashTableShared'
 import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
+import HashTableExplainPanel from './components/algorithms/HashTableExplainPanel'
+import HashTableLegend from './components/algorithms/HashTableLegend'
 import AlgorithmGalleryUi from './components/museum/AlgorithmGalleryUi'
 import AlgorithmInstallationUi from './components/museum/AlgorithmInstallationUi'
 import AlgorithmPlaque from './components/museum/AlgorithmPlaque'
@@ -767,6 +769,16 @@ function App() {
           </button>
           <AlgorithmLegend algorithmId={selectedAlgorithm.id} />
           <div className="algorithm-focused-ui">
+            {showingHashTable ? (
+              <div className="hash-table-side">
+                <HashTableLegend />
+                <HashTableExplainPanel
+                  snapshot={playback.currentStep?.hashTableSnapshot ?? null}
+                  description={playback.currentStep?.description}
+                  inspection={playback.currentStep?.inspection}
+                />
+              </div>
+            ) : null}
             <AlgorithmPlaque
               algorithm={selectedAlgorithm}
               primer={
