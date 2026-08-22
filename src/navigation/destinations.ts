@@ -24,6 +24,14 @@ export const ROOM_DEPTH = 28
 export const ROOM_HEIGHT = 9
 export const WALL_THICKNESS = 0.3
 
+export const CAMERA_FOV = 46
+
+// The installation plate is nearly as wide as its hall, and the focus camera sits
+// close to it, so the framing only holds on a wide viewport. Below this aspect the
+// vertical fov is widened to keep the horizontal field (and the whole plate) intact.
+export const MIN_FRAMED_ASPECT = 1.78
+export const MAX_CAMERA_FOV = 70
+
 export const ENTRANCE_PORTAL = {
   width: 4.6,
   height: 3.7,

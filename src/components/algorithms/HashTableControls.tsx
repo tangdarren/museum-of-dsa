@@ -189,11 +189,6 @@ function HashTableControls({
           Reset Table
         </button>
       </div>
-      <p className="hash-table-controls-note">
-        Average insert, search, and delete are O(1). A collision means this
-        bucket already has entries, so the chain is scanned and the operation
-        can take longer.
-      </p>
     </form>
   )
 }

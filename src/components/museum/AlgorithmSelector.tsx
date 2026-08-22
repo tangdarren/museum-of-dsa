@@ -1,5 +1,6 @@
 import type {
   AlgorithmCatalogSection,
+  AlgorithmCategory,
   AlgorithmId,
 } from '../../types/algorithm'
 import { ALGORITHM_SECTIONS } from '../../data/algorithms'
@@ -11,6 +12,7 @@ type AlgorithmSelectorProps = {
   title?: string
   onPreview: (id: AlgorithmId | null) => void
   onSelect: (id: AlgorithmId) => void
+  onSelectCategory?: (category: AlgorithmCategory) => void
   onClose: () => void
 }
 
@@ -21,6 +23,7 @@ function AlgorithmSelector({
   title = 'Choose algorithm',
   onPreview,
   onSelect,
+  onSelectCategory,
   onClose,
 }: AlgorithmSelectorProps) {
   return (
@@ -53,7 +56,21 @@ function AlgorithmSelector({
       </div>
       {sections.map((section) => (
         <section key={section.category} className="algorithm-selector-section">
-          <h3>{section.category}</h3>
+          <h3>
+            {onSelectCategory ? (
+              <button
+                type="button"
+                className="algorithm-selector-gallery"
+                onClick={() => onSelectCategory(section.category)}
+                disabled={disabled}
+              >
+                {section.category}
+                <span aria-hidden="true">Visit</span>
+              </button>
+            ) : (
+              section.category
+            )}
+          </h3>
           <div className="algorithm-selector-list">
             {section.entries.map((entry) =>
               entry.available ? (

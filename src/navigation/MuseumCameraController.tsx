@@ -1,12 +1,32 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useRef } from 'react'
-import { Vector3 } from 'three'
-import { MUSEUM_DESTINATIONS, type MuseumDestination } from './destinations'
+import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
+import {
+  CAMERA_FOV,
+  MAX_CAMERA_FOV,
+  MIN_FRAMED_ASPECT,
+  MUSEUM_DESTINATIONS,
+  type MuseumDestination,
+} from './destinations'
 
 const DURATION = 1.75
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
+}
+
+function framedFov(aspect: number) {
+  if (!Number.isFinite(aspect) || aspect >= MIN_FRAMED_ASPECT) {
+    return CAMERA_FOV
+  }
+
+  const halfHeight =
+    Math.tan(MathUtils.degToRad(CAMERA_FOV) / 2) * (MIN_FRAMED_ASPECT / aspect)
+
+  return Math.min(
+    MAX_CAMERA_FOV,
+    MathUtils.radToDeg(2 * Math.atan(halfHeight)),
+  )
 }
 
 type MuseumCameraControllerProps = {
@@ -19,6 +39,7 @@ function MuseumCameraController({
   onArrived,
 }: MuseumCameraControllerProps) {
   const camera = useThree((state) => state.camera)
+  const size = useThree((state) => state.size)
   const progress = useRef(1)
   const arrivedNotified = useRef(true)
   const fromPosition = useRef(new Vector3())
@@ -32,6 +53,15 @@ function MuseumCameraController({
     lookAt.current.set(...MUSEUM_DESTINATIONS.entrance.lookAt)
     camera.lookAt(lookAt.current)
   }, [camera])
+
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera) || size.height === 0) {
+      return
+    }
+
+    camera.fov = framedFov(size.width / size.height)
+    camera.updateProjectionMatrix()
+  }, [camera, size])
 
   useEffect(() => {
     fromPosition.current.copy(camera.position)

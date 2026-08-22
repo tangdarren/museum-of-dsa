@@ -3,9 +3,7 @@ import type { AlgorithmId } from '../../types/algorithm'
 import type { AlgorithmHashTableSnapshot } from '../../types/algorithmStep'
 import type { SortingMetrics } from '../../types/sorting'
 import AlgorithmPlaybackControls from './AlgorithmPlaybackControls'
-import HashTableControls, {
-  type HashTableControlMode,
-} from './HashTableControls'
+import type { HashTableControlMode } from './HashTableControls'
 import LinkedListControls, {
   type LinkedListControlMode,
   type LinkedListDeleteControls,
@@ -41,17 +39,7 @@ export type LinkedListPlaybackExtras = {
 
 export type HashTablePlaybackExtras = {
   mode: HashTableControlMode
-  disabled?: boolean
-  hashKey: string
-  hashValue: string
-  presentKeys: string[]
-  missingKeys: string[]
-  error?: string | null
   snapshot: AlgorithmHashTableSnapshot | null
-  onChangeKey: (value: string) => void
-  onChangeValue: (value: string) => void
-  onSelectKey: (key: string, value?: string) => void
-  onResetTable: () => void
 }
 
 type AlgorithmPlaybackViewProps = {
@@ -318,25 +306,6 @@ function AlgorithmPlaybackView({
           search={linkedList.search}
           insert={linkedList.insert}
           delete={linkedList.delete}
-        />
-      ) : null}
-      {hashTable ? (
-        <HashTableControls
-          disabled={hashTable.disabled ?? disabled}
-          mode={hashTable.mode}
-          entryKey={hashTable.hashKey}
-          entryValue={hashTable.hashValue}
-          keyError={hashTable.error}
-          presentKeys={hashTable.presentKeys}
-          missingKeys={hashTable.missingKeys}
-          onKeyChange={hashTable.onChangeKey}
-          onValueChange={hashTable.onChangeValue}
-          onSelectInsertPair={
-            hashTable.mode === 'insert'
-              ? (pair) => hashTable.onSelectKey(pair.key, pair.value)
-              : undefined
-          }
-          onResetTable={hashTable.onResetTable}
         />
       ) : null}
     </section>

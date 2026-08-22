@@ -21,6 +21,9 @@ import {
 } from './algorithms/hashTableShared'
 import AlgorithmLegend from './components/algorithms/AlgorithmLegend'
 import AlgorithmPlaybackView from './components/algorithms/AlgorithmPlaybackView'
+import HashTableControls, {
+  type HashTableControlMode,
+} from './components/algorithms/HashTableControls'
 import HashTableExplainPanel from './components/algorithms/HashTableExplainPanel'
 import HashTableLegend from './components/algorithms/HashTableLegend'
 import AlgorithmGalleryUi from './components/museum/AlgorithmGalleryUi'
@@ -67,6 +70,7 @@ import {
 import { useAlgorithmPlayback } from './hooks/useAlgorithmPlayback'
 import MuseumCameraController from './navigation/MuseumCameraController'
 import {
+  CAMERA_FOV,
   MUSEUM_DESTINATIONS,
   getMuseumDestination,
   type MuseumLocation,
@@ -191,6 +195,11 @@ function App() {
   const showingHashTableSearch = Boolean(
     selectedAlgorithmId && usesHashTableSearch(selectedAlgorithmId),
   )
+  const hashTableMode: HashTableControlMode = showingHashTableInsert
+    ? 'insert'
+    : showingHashTableSearch
+      ? 'search'
+      : 'delete'
   const hashKey = normalizeHashTableInput(hashKeyInput)
   const hashValue = normalizeHashTableInput(hashValueInput)
   const hashKeyError =
@@ -625,7 +634,7 @@ function App() {
         shadows
         camera={{
           position: MUSEUM_DESTINATIONS.entrance.cameraPosition,
-          fov: 46,
+          fov: CAMERA_FOV,
         }}
         onCreated={() => {
           requestAnimationFrame(() => {
@@ -710,6 +719,7 @@ function App() {
                 setPreviewAlgorithmId(null)
               }}
               onSelectAlgorithm={handleSelectAlgorithm}
+              onSelectGallery={handleSelectGallery}
             />
           ) : (
             <div className="algorithm-stage">
@@ -776,6 +786,23 @@ function App() {
                   snapshot={playback.currentStep?.hashTableSnapshot ?? null}
                   description={playback.currentStep?.description}
                   inspection={playback.currentStep?.inspection}
+                />
+                <HashTableControls
+                  disabled={playback.isPlaying}
+                  mode={hashTableMode}
+                  entryKey={hashKeyInput}
+                  entryValue={hashValueInput}
+                  keyError={hashKeyError}
+                  presentKeys={hashTableKeys.present}
+                  missingKeys={hashTableKeys.missing}
+                  onKeyChange={handleChangeHashKey}
+                  onValueChange={handleChangeHashValue}
+                  onSelectInsertPair={
+                    hashTableMode === 'insert'
+                      ? (pair) => handleSelectHashKey(pair.key, pair.value)
+                      : undefined
+                  }
+                  onResetTable={handleResetHashTable}
                 />
               </div>
             ) : null}
@@ -860,23 +887,9 @@ function App() {
               hashTable={
                 showingHashTable
                   ? {
-                      mode: showingHashTableInsert
-                        ? 'insert'
-                        : showingHashTableSearch
-                          ? 'search'
-                          : 'delete',
-                      disabled: playback.isPlaying,
-                      hashKey: hashKeyInput,
-                      hashValue: hashValueInput,
-                      presentKeys: hashTableKeys.present,
-                      missingKeys: hashTableKeys.missing,
-                      error: hashKeyError,
+                      mode: hashTableMode,
                       snapshot:
                         playback.currentStep?.hashTableSnapshot ?? null,
-                      onChangeKey: handleChangeHashKey,
-                      onChangeValue: handleChangeHashValue,
-                      onSelectKey: handleSelectHashKey,
-                      onResetTable: handleResetHashTable,
                     }
                   : undefined
               }
