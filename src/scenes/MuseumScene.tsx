@@ -7,22 +7,18 @@ import type {
   HemisphereLight,
   SpotLight,
 } from 'three'
-import AlgorithmGalleryPanel from '../components/museum/AlgorithmGalleryPanel'
 import AlgorithmInstallation from '../components/museum/AlgorithmInstallation'
 import ExhibitHall from '../components/museum/ExhibitHall'
 import MuseumSign from '../components/museum/MuseumSign'
-import { ALGORITHM_SECTIONS, DATA_STRUCTURE_SECTIONS } from '../data/algorithms'
 import { createIdleHashTableSnapshot, SAMPLE_HASH_TABLE } from '../data/sampleHashTable'
 import { createSampleLinkedListSnapshot, SAMPLE_DOUBLY_LINKED_LIST, SAMPLE_LINKED_LIST } from '../data/sampleLinkedList'
 import { museum } from '../theme/palette'
-import type { AlgorithmCategory, AlgorithmDefinition, AlgorithmId } from '../types/algorithm'
+import type { AlgorithmDefinition } from '../types/algorithm'
 import { isAlgorithmRoomCategory, isDataStructureCategory, isHashTableCategory } from '../types/algorithm'
 import type { AlgorithmStep } from '../types/algorithmStep'
 import type { GraphNodeStates } from '../types/graph'
 import {
-  ALGORITHM_GALLERY_PLACEMENTS,
   ALGORITHMS_CENTER_X,
-  DATA_STRUCTURE_GALLERY_PLACEMENTS,
   DATA_STRUCTURE_INSTALLATION_POSITION,
   DATA_STRUCTURES_CENTER_X,
   ENTRANCE_PORTAL,
@@ -380,10 +376,6 @@ type MuseumSceneProps = {
   onSelectNode?: (nodeId: string) => void
   onSelectAlgorithms: () => void
   onSelectDataStructures?: () => void
-  selectedGallery?: AlgorithmCategory | null
-  onSelectGallery?: (category: AlgorithmCategory) => void
-  onSelectGalleryAlgorithm?: (id: AlgorithmId, category: AlgorithmCategory) => void
-  galleryInteractive?: boolean
   isTransitioning: boolean
   showEntranceLettering?: boolean
 }
@@ -398,18 +390,10 @@ function MuseumScene({
   onSelectNode,
   onSelectAlgorithms,
   onSelectDataStructures,
-  selectedGallery = null,
-  onSelectGallery,
-  onSelectGalleryAlgorithm,
-  galleryInteractive = false,
   isTransitioning,
   showEntranceLettering = true,
 }: MuseumSceneProps) {
   const showLobbyDestinations = location !== 'entrance'
-  const algorithmsGalleryInteractive =
-    galleryInteractive && location === 'algorithms'
-  const dataStructureGalleryInteractive =
-    galleryInteractive && location === 'data-structures'
   const algorithmsAlgorithm =
     selectedAlgorithm && isAlgorithmRoomCategory(selectedAlgorithm.category)
       ? selectedAlgorithm
@@ -426,12 +410,12 @@ function MuseumScene({
     previewAlgorithm && isDataStructureCategory(previewAlgorithm.category)
       ? previewAlgorithm
       : null
+  const dataStructureCategory =
+    dataStructureAlgorithm?.category ?? dataStructurePreview?.category ?? null
   const showingHashTableExhibit =
-    (selectedGallery !== null && isHashTableCategory(selectedGallery)) ||
-    (dataStructureAlgorithm !== null &&
-      isHashTableCategory(dataStructureAlgorithm.category)) ||
-    (dataStructurePreview !== null &&
-      isHashTableCategory(dataStructurePreview.category))
+    dataStructureCategory !== null && isHashTableCategory(dataStructureCategory)
+  const showingDoublyLinkedListExhibit =
+    dataStructureCategory === 'Doubly Linked List'
   const inspection = selectedAlgorithm !== null
   const ambientRef = useRef<AmbientLight>(null)
   const hemisphereRef = useRef<HemisphereLight>(null)
@@ -778,28 +762,6 @@ function MuseumScene({
         setupNodeStates={location === 'algorithms' ? setupNodeStates : undefined}
         onSelectNode={location === 'algorithms' ? onSelectNode : undefined}
       />
-      {ALGORITHM_SECTIONS.map((section) => {
-        const placement = ALGORITHM_GALLERY_PLACEMENTS[section.category]
-
-        return (
-          <AlgorithmGalleryPanel
-            key={section.category}
-            category={section.category}
-            entries={section.entries}
-            position={placement.position}
-            rotation={placement.rotation}
-            active={selectedGallery === section.category}
-            disabled={!algorithmsGalleryInteractive}
-            onSelectGallery={onSelectGallery}
-            onSelectAlgorithm={
-              onSelectGalleryAlgorithm
-                ? (id) => onSelectGalleryAlgorithm(id, section.category)
-                : undefined
-            }
-          />
-        )
-      })}
-
       <AlgorithmInstallation
         position={DATA_STRUCTURE_INSTALLATION_POSITION}
         plateLabel={showingHashTableExhibit ? 'HASH TABLES' : 'LINKED LISTS'}
@@ -808,7 +770,7 @@ function MuseumScene({
         idleLinkedListSnapshot={
           showingHashTableExhibit
             ? null
-            : selectedGallery === 'Doubly Linked List'
+            : showingDoublyLinkedListExhibit
               ? IDLE_DOUBLY_LINKED_LIST_SNAPSHOT
               : IDLE_SINGLY_LINKED_LIST_SNAPSHOT
         }
@@ -819,28 +781,6 @@ function MuseumScene({
         preview={location === 'data-structures' ? dataStructurePreview : null}
         playbackStep={location === 'data-structures' ? playbackStep : null}
       />
-      {DATA_STRUCTURE_SECTIONS.map((section) => {
-        const placement = DATA_STRUCTURE_GALLERY_PLACEMENTS[section.category]
-
-        return (
-          <AlgorithmGalleryPanel
-            key={section.category}
-            category={section.category}
-            entries={section.entries}
-            position={placement.position}
-            rotation={placement.rotation}
-            active={selectedGallery === section.category}
-            disabled={!dataStructureGalleryInteractive}
-            onSelectGallery={onSelectGallery}
-            onSelectAlgorithm={
-              onSelectGalleryAlgorithm
-                ? (id) => onSelectGalleryAlgorithm(id, section.category)
-                : undefined
-            }
-          />
-        )
-      })}
-
       {COLUMNS.map((position) => (
         <Column key={position.join(',')} position={position} />
       ))}

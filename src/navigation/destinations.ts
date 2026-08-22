@@ -1,13 +1,4 @@
-import type {
-  AlgorithmCategory,
-  AlgorithmId,
-  AlgorithmRoomCategory,
-  DataStructureCategory,
-} from '../types/algorithm'
-import {
-  isAlgorithmRoomCategory,
-  isDataStructureCategory,
-} from '../types/algorithm'
+import type { AlgorithmId } from '../types/algorithm'
 
 export type Vec3 = [number, number, number]
 
@@ -122,185 +113,16 @@ export const DATA_STRUCTURE_FOCUS_DESTINATION: MuseumDestination = {
   lookAt: DATA_STRUCTURE_INSTALLATION_LOOK_AT,
 }
 
-const ALGORITHMS_LEFT_WALL_X =
-  ALGORITHMS_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
-const ALGORITHMS_RIGHT_WALL_X =
-  ALGORITHMS_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
-const DATA_STRUCTURES_LEFT_WALL_X =
-  DATA_STRUCTURES_CENTER_X - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
-const DATA_STRUCTURES_RIGHT_WALL_X =
-  DATA_STRUCTURES_CENTER_X + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
-const GALLERY_FRONT_Z = ALGORITHMS_CENTER_Z + 2.55
-const GALLERY_BACK_Z = ALGORITHMS_CENTER_Z - 2.15
-const GALLERY_VIEW_DISTANCE = 4.55
-const GALLERY_PANEL_Y = 3.28
-
-export type AlgorithmGallerySide = 'left' | 'right'
-
-export type AlgorithmGalleryPlacement = {
-  side: AlgorithmGallerySide
-  position: Vec3
-  rotation: Vec3
-}
-
-export const ALGORITHM_GALLERY_PLACEMENTS: Record<
-  AlgorithmRoomCategory,
-  AlgorithmGalleryPlacement
-> = {
-  'Graph Traversal': {
-    side: 'left',
-    position: [ALGORITHMS_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-    rotation: [0, Math.PI / 2, 0],
-  },
-  Pathfinding: {
-    side: 'left',
-    position: [ALGORITHMS_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-    rotation: [0, Math.PI / 2, 0],
-  },
-  Sorting: {
-    side: 'right',
-    position: [ALGORITHMS_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-    rotation: [0, -Math.PI / 2, 0],
-  },
-  Trees: {
-    side: 'right',
-    position: [ALGORITHMS_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-    rotation: [0, -Math.PI / 2, 0],
-  },
-}
-
-function galleryCameraX(side: AlgorithmGallerySide, centerX: number) {
-  const leftX = centerX - ALGORITHMS_ROOM_WIDTH / 2 + 0.2
-  const rightX = centerX + ALGORITHMS_ROOM_WIDTH / 2 - 0.2
-
-  return side === 'left'
-    ? leftX + GALLERY_VIEW_DISTANCE
-    : rightX - GALLERY_VIEW_DISTANCE
-}
-
-export const ALGORITHM_GALLERY_DESTINATIONS: Record<
-  AlgorithmRoomCategory,
-  MuseumDestination
-> = {
-  'Graph Traversal': {
-    id: 'gallery-graph-traversal',
-    cameraPosition: [
-      galleryCameraX('left', ALGORITHMS_CENTER_X),
-      3.22,
-      GALLERY_FRONT_Z,
-    ],
-    lookAt: [ALGORITHMS_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-  },
-  Pathfinding: {
-    id: 'gallery-pathfinding',
-    cameraPosition: [
-      galleryCameraX('left', ALGORITHMS_CENTER_X),
-      3.22,
-      GALLERY_BACK_Z,
-    ],
-    lookAt: [ALGORITHMS_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-  },
-  Sorting: {
-    id: 'gallery-sorting',
-    cameraPosition: [
-      galleryCameraX('right', ALGORITHMS_CENTER_X),
-      3.22,
-      GALLERY_FRONT_Z,
-    ],
-    lookAt: [ALGORITHMS_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-  },
-  Trees: {
-    id: 'gallery-trees',
-    cameraPosition: [
-      galleryCameraX('right', ALGORITHMS_CENTER_X),
-      3.22,
-      GALLERY_BACK_Z,
-    ],
-    lookAt: [ALGORITHMS_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-  },
-}
-
-export const DATA_STRUCTURE_GALLERY_PLACEMENTS: Record<
-  DataStructureCategory,
-  AlgorithmGalleryPlacement
-> = {
-  'Singly Linked List': {
-    side: 'left',
-    position: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-    rotation: [0, Math.PI / 2, 0],
-  },
-  'Doubly Linked List': {
-    side: 'right',
-    position: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-    rotation: [0, -Math.PI / 2, 0],
-  },
-  'Hash Table': {
-    side: 'left',
-    position: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-    rotation: [0, Math.PI / 2, 0],
-  },
-}
-
-export const DATA_STRUCTURE_GALLERY_DESTINATIONS: Record<
-  DataStructureCategory,
-  MuseumDestination
-> = {
-  'Singly Linked List': {
-    id: 'gallery-singly-linked-list',
-    cameraPosition: [
-      galleryCameraX('left', DATA_STRUCTURES_CENTER_X),
-      3.22,
-      GALLERY_FRONT_Z,
-    ],
-    lookAt: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-  },
-  'Doubly Linked List': {
-    id: 'gallery-doubly-linked-list',
-    cameraPosition: [
-      galleryCameraX('right', DATA_STRUCTURES_CENTER_X),
-      3.22,
-      GALLERY_FRONT_Z,
-    ],
-    lookAt: [DATA_STRUCTURES_RIGHT_WALL_X, GALLERY_PANEL_Y, GALLERY_FRONT_Z],
-  },
-  'Hash Table': {
-    id: 'gallery-hash-table',
-    cameraPosition: [
-      galleryCameraX('left', DATA_STRUCTURES_CENTER_X),
-      3.22,
-      GALLERY_BACK_Z,
-    ],
-    lookAt: [DATA_STRUCTURES_LEFT_WALL_X, GALLERY_PANEL_Y, GALLERY_BACK_Z],
-  },
-}
-
 export function getMuseumDestination(
   location: MuseumLocation,
   selectedAlgorithm: AlgorithmId | null = null,
-  selectedGallery: AlgorithmCategory | null = null,
 ): MuseumDestination {
   if (location === 'algorithms' && selectedAlgorithm) {
     return ALGORITHM_FOCUS_DESTINATION
   }
 
-  if (
-    location === 'algorithms' &&
-    selectedGallery &&
-    isAlgorithmRoomCategory(selectedGallery)
-  ) {
-    return ALGORITHM_GALLERY_DESTINATIONS[selectedGallery]
-  }
-
   if (location === 'data-structures' && selectedAlgorithm) {
     return DATA_STRUCTURE_FOCUS_DESTINATION
-  }
-
-  if (
-    location === 'data-structures' &&
-    selectedGallery &&
-    isDataStructureCategory(selectedGallery)
-  ) {
-    return DATA_STRUCTURE_GALLERY_DESTINATIONS[selectedGallery]
   }
 
   return MUSEUM_DESTINATIONS[location]

@@ -1,7 +1,6 @@
 import AlgorithmSelector from './AlgorithmSelector'
 import type {
   AlgorithmCatalogSection,
-  AlgorithmCategory,
   AlgorithmId,
 } from '../../types/algorithm'
 
@@ -16,7 +15,6 @@ type AlgorithmInstallationUiProps = {
   onOpenSelector: () => void
   onCloseSelector: () => void
   onSelectAlgorithm: (id: AlgorithmId) => void
-  onSelectGallery?: (category: AlgorithmCategory) => void
 }
 
 function AlgorithmInstallationUi({
@@ -30,7 +28,6 @@ function AlgorithmInstallationUi({
   onOpenSelector,
   onCloseSelector,
   onSelectAlgorithm,
-  onSelectGallery,
 }: AlgorithmInstallationUiProps) {
   if (selectorOpen) {
     return (
@@ -41,7 +38,6 @@ function AlgorithmInstallationUi({
         title={selectorTitle}
         onPreview={onPreview}
         onSelect={onSelectAlgorithm}
-        onSelectCategory={onSelectGallery}
         onClose={onCloseSelector}
       />
     )

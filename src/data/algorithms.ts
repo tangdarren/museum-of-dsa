@@ -1,6 +1,5 @@
 import type {
   AlgorithmCatalogEntry,
-  AlgorithmCategory,
   AlgorithmDefinition,
   AlgorithmId,
   AlgorithmRoomCategory,
@@ -182,14 +181,4 @@ export const DATA_STRUCTURE_SECTIONS: {
 
 export function getAlgorithmById(id: AlgorithmId): AlgorithmDefinition {
   return ALGORITHMS.find((entry) => entry.id === id) ?? ALGORITHMS[0]
-}
-
-export function getGalleryEntries(
-  category: AlgorithmCategory,
-): AlgorithmCatalogEntry[] {
-  return (
-    [...ALGORITHM_SECTIONS, ...DATA_STRUCTURE_SECTIONS].find(
-      (section) => section.category === category,
-    )?.entries ?? []
-  )
 }
